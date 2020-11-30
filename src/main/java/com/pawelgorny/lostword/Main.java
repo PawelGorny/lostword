@@ -88,9 +88,6 @@ public class Main {
                 System.out.println(words.size() + " words found, expected " + (size - 1));
                 System.exit(2);
             }
-            if (targetAddress != null) {
-                System.out.println("Expected address: '" + targetAddress + "'");
-            }
         } catch (IOException e) {
             System.err.println("error: " + e.getLocalizedMessage());
             System.exit(-1);

@@ -2,7 +2,6 @@ package com.pawelgorny.lostword;
 
 import org.bitcoinj.core.Address;
 import org.bitcoinj.crypto.*;
-import org.bitcoinj.script.Script;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -30,6 +29,7 @@ public class Worker {
     }
 
     void run() throws InterruptedException, MnemonicException {
+        System.out.println("Expected address: '" + configuration.getTargetAddress() + "'");
         System.out.println("Using " + THREADS + " threads");
         check();
         System.out.println("");
@@ -100,7 +100,7 @@ public class Worker {
         DeterministicKey deterministicKey = HDKeyDerivation.createMasterPrivateKey(MnemonicCode.toSeed(mnemonic, ""));
         DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, new ChildNumber(configuration.getDPaccount(), false));
         DeterministicKey new_address_key = HDKeyDerivation.deriveChildKey(receiving, new ChildNumber(configuration.getDPaddress(), configuration.isDPhard()));
-        if (configuration.getTargetAddress().equalsIgnoreCase(Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, Script.ScriptType.P2PKH).toString())) {
+        if (configuration.getTargetAddress().equalsIgnoreCase(Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, configuration.getDBscriptType()).toString())) {
             return true;
         }
         return false;

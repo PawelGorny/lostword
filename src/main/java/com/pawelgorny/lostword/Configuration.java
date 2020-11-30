@@ -3,6 +3,7 @@ package com.pawelgorny.lostword;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.script.Script;
 
 import java.util.List;
 
@@ -11,18 +12,19 @@ public final class Configuration {
     final static MnemonicCode MNEMONIC_CODE = getMnemonicCode();
     private final NetworkParameters NETWORK_PARAMETERS = MainNetParams.get();
     private final String DEFAULT_PATH = "m/0/0";
-    private final String targetAddress;
+    private String targetAddress;
     private int SIZE;
     private List<String> WORDS;
     private int DPaccount = 0;
     private int DPaddress = 0;
     private boolean DPhard = false;
+    private Script.ScriptType DBscriptType = Script.ScriptType.P2PKH;
 
     public Configuration(String targetAddress, String path, List<String> words) {
-        this.targetAddress = targetAddress;
         this.WORDS = words;
         this.SIZE = words.size() + 1;
         parsePath(path);
+        parseScript(targetAddress);
     }
 
     private static MnemonicCode getMnemonicCode() {
@@ -30,6 +32,22 @@ public final class Configuration {
             return new MnemonicCode();
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    private void parseScript(String targetAddress) {
+        if (targetAddress.contains(",")) {
+            String[] t = targetAddress.split(",");
+            if (t[1] != null) {
+                if (Script.ScriptType.P2PKH.name().equalsIgnoreCase(t[1])) {
+                    DBscriptType = Script.ScriptType.P2PKH;
+                } else if (Script.ScriptType.P2WPKH.name().equalsIgnoreCase(t[1])) {
+                    DBscriptType = Script.ScriptType.P2WPKH;
+                }
+            }
+            this.targetAddress = t[0];
+        } else {
+            this.targetAddress = targetAddress;
         }
     }
 
@@ -45,6 +63,7 @@ public final class Configuration {
             DPaccount = Integer.parseInt(dpath[1]);
             DPaddress = Integer.parseInt(dpath[2]);
             DPhard = path.endsWith("'");
+            System.out.println("Using derivation path " + path);
         } catch (Exception e) {
             parsePath(this.DEFAULT_PATH);
         }
@@ -76,5 +95,9 @@ public final class Configuration {
 
     public boolean isDPhard() {
         return DPhard;
+    }
+
+    public Script.ScriptType getDBscriptType() {
+        return DBscriptType;
     }
 }
