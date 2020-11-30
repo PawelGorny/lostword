@@ -39,15 +39,17 @@ public final class Configuration {
         if (targetAddress.contains(",")) {
             String[] t = targetAddress.split(",");
             if (t[1] != null) {
-                if (Script.ScriptType.P2PKH.name().equalsIgnoreCase(t[1])) {
+                t[1] = t[1].trim();
+                if (Script.ScriptType.P2PKH.name().equalsIgnoreCase(t[1].trim())) {
                     DBscriptType = Script.ScriptType.P2PKH;
                 } else if (Script.ScriptType.P2WPKH.name().equalsIgnoreCase(t[1])) {
                     DBscriptType = Script.ScriptType.P2WPKH;
                 }
             }
-            this.targetAddress = t[0];
+            System.out.println("Using script " + DBscriptType);
+            this.targetAddress = t[0].trim();
         } else {
-            this.targetAddress = targetAddress;
+            this.targetAddress = targetAddress.trim();
         }
     }
 
