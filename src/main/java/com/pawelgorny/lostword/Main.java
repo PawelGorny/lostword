@@ -1,88 +1,106 @@
 package com.pawelgorny.lostword;
 
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.crypto.*;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.script.Script;
+import org.bitcoinj.crypto.MnemonicException;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class Main {
 
-    private static MnemonicCode MNEMONIC_CODE;
-    private static String TARGET;
-    private static String RESULT = null;
-
-    private static final NetworkParameters PARAMETERS = MainNetParams.get();
-    private static final int SIZE = 24;
-
-    private static List<String> WORDS = new ArrayList<>(SIZE-1);
-
-    public static void main(String[] args) throws IOException, MnemonicException {
-        if (args==null || args.length!=SIZE){
-            System.out.println("usage: java -jar lostWord.jar ADDRESS word1 word2 ... word23");
-            System.exit(1);
-        }
-        MNEMONIC_CODE = new MnemonicCode();
-        TARGET = args[0];
-        for (int w=1; w<args.length; w++){
-            if (!MNEMONIC_CODE.getWordList().contains(args[w])){
-                System.out.println("WORD not in BIP39: "+args[w]);
-                System.exit(2);
-            }
-            WORDS.add(args[w]);
-        }
-        int position = check();
-        if (RESULT==null){
-            System.out.println("not found");
+    public static void main(String[] args) throws IOException, MnemonicException, InterruptedException {
+        if (args.length < 1 || "--help".equals(args[0])) {
+            showFile("help.txt");
+            showFile("footer.txt");
             System.exit(0);
         }
-        System.out.println("MISSING: "+RESULT+" at position: "+position);
-        System.exit(0);
+        Configuration configuration = readConfiguration(args[0]);
+        Worker worker = new Worker(configuration);
+        worker.run();
+        showFile("footer.txt");
     }
 
-    private static int check() throws MnemonicException {
-        List<String> mnemonic = new ArrayList<>(SIZE);
-        for (int i=0;i<SIZE;i++){
-            mnemonic.add("");
-        }
-        for (int position=0; position<=SIZE; position++){
-            System.out.println("Checking missing words at position "+(position+1));
-            Iterator<String> iterator = WORDS.iterator();
-            int p = 0;
-            while (iterator.hasNext()){
-                if (p==position){
-                    p++;
-                }
-                mnemonic.set(p++, iterator.next());
+    private static void showFile(String fileName) {
+        String line;
+        try {
+            BufferedReader bufferReader = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("/" + fileName)));
+            while ((line = bufferReader.readLine()) != null) {
+                line = line.trim();
+                System.out.println(line);
             }
-            for (int bipPosition=0; bipPosition<MNEMONIC_CODE.getWordList().size(); bipPosition++){
-                if (bipPosition%100==0){
-                    System.out.println("Checking possible word nr "+(bipPosition+1));
-                }
-                mnemonic.set(position, MNEMONIC_CODE.getWordList().get(bipPosition));
-                if (check(mnemonic)){
-                    RESULT = MNEMONIC_CODE.getWordList().get(bipPosition);
-                    return 1+position;
-                }
-            }
+            bufferReader.close();
+        } catch (IOException e) {
+            System.err.println("error: " + e.getLocalizedMessage());
+            System.exit(-1);
         }
-        return -1;
     }
 
-    private static boolean check(List<String> mnemonic) throws MnemonicException {
-        byte[] seed = MnemonicCode.toSeed(mnemonic, "");
-        DeterministicKey deterministicKey = HDKeyDerivation.createMasterPrivateKey(seed);
-        DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, new ChildNumber(0, false));
-        DeterministicKey new_address_key = HDKeyDerivation.deriveChildKey(receiving, new ChildNumber(0, false));
-        if (TARGET.equalsIgnoreCase(Address.fromKey(PARAMETERS, new_address_key, Script.ScriptType.P2PKH).toString())){
-            System.out.println(mnemonic);
-            return true;
+    private static Configuration readConfiguration(String file) {
+        FileReader fileReader = null;
+        try {
+            fileReader = new FileReader(file);
+        } catch (FileNotFoundException e) {
+            System.err.println("not found: " + file);
+            System.exit(-1);
         }
-        return false;
+        BufferedReader bufferReader = new BufferedReader(fileReader);
+        String line;
+        int lineNumber = 0;
+        int size = 0;
+        String targetAddress = null;
+        List<String> words = new ArrayList<>(0);
+        String path = null;
+        try {
+            while ((line = bufferReader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith(Configuration.COMMENT_CHAR)) {
+                    continue;
+                }
+                switch (lineNumber) {
+                    case 0:
+                        targetAddress = line;
+                        break;
+                    case 1:
+                        try {
+                            Integer.parseInt(line);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Cannot parse number of words '" + line + "'. Expected: 12, 16, 24...");
+                            System.exit(1);
+                        }
+                        size = Integer.valueOf(line);
+                        words = new ArrayList<>(size - 1);
+                        break;
+                    default:
+                        if (words.size() == size - 1) {
+                            path = line;
+                        } else if (words.size() < size - 1) {
+                            if (!Configuration.MNEMONIC_CODE.getWordList().contains(line)) {
+                                System.out.println("WORD not in BIP39: " + line);
+                                System.exit(1);
+                            }
+                            words.add(line);
+                        }
+                        break;
+                }
+                lineNumber++;
+            }
+            if (words.size() + 1 < size) {
+                System.out.println(words.size() + " words found, expected " + (size - 1));
+                System.exit(2);
+            }
+            if (targetAddress != null) {
+                System.out.println("Expected address: '" + targetAddress + "'");
+            }
+        } catch (IOException e) {
+            System.err.println("error: " + e.getLocalizedMessage());
+            System.exit(-1);
+        } finally {
+            try {
+                bufferReader.close();
+            } catch (IOException ioe) {
+                //file problem?
+            }
+        }
+        return new Configuration(targetAddress, path, words);
     }
 }

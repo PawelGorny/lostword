@@ -1,0 +1,5 @@
+Usage:
+java -jar lostword.jar input.conf
+
+
+
