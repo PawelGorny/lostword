@@ -16,6 +16,12 @@ It is possible to launch tests against 'hardened' addresses, using ' (apostrophe
 Using page https://iancoleman.io/bip39/ you may easily check what to expect for the given seed.
 By default program uses P2PKH script semantics (addresses like 1...), but script could be defined in the 'address' line, after the comma - please check file example4.conf.
 
+Contact
+-------
+Contact email: crypto@pawelgorny.com
+If you found this program useful, consider making a donation, I will appreciate it! 
+**BTC**: `34dEiyShGJcnGAg2jWhcoDDRxpennSZxg8`
+
 TODO
 ----
 <ol>
