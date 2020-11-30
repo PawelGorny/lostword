@@ -101,7 +101,6 @@ public class Worker {
         DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, new ChildNumber(configuration.getDPaccount(), false));
         DeterministicKey new_address_key = HDKeyDerivation.deriveChildKey(receiving, new ChildNumber(configuration.getDPaddress(), configuration.isDPhard()));
         if (configuration.getTargetAddress().equalsIgnoreCase(Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, Script.ScriptType.P2PKH).toString())) {
-            System.out.println(mnemonic);
             return true;
         }
         return false;
