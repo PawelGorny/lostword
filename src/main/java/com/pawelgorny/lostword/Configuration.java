@@ -46,11 +46,15 @@ public final class Configuration {
                     DBscriptType = Script.ScriptType.P2WPKH;
                 }
             }
-            System.out.println("Using script " + DBscriptType);
             this.targetAddress = t[0].trim();
         } else {
             this.targetAddress = targetAddress.trim();
+            DBscriptType = Script.ScriptType.P2PKH;
+            if (this.targetAddress.startsWith("bc1")) {
+                DBscriptType = Script.ScriptType.P2WPKH;
+            }
         }
+        System.out.println("Using script " + DBscriptType);
     }
 
     private void parsePath(String path) {

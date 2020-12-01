@@ -1,6 +1,6 @@
 # LostWord
 Tool for finding missing word for BIP39 seed, having (n-1) known ordered words.
-Program works with BIP141/P2PKH or BIP32/P2PKH Derivation Path.
+Program works with BIP141/P2WPKH or BIP32/P2PKH Derivation Path.
 
 Usage:
 `java -jar lostWord.jar configurationFile`
@@ -14,7 +14,7 @@ Configuration file expects: address, number of words, known words and additional
 This version checks only one address - for the given path. In the future (or if requested) I will add possibility to verify all the addresses up to address number x. Today, if you know address but you do not know if it was first or second from the derivation path, you must launch program twice, using two different paths (m/0/0 and m/0/1).
 It is possible to launch tests against 'hardened' addresses, using ' (apostrophe) as the last character of path.
 Using page https://iancoleman.io/bip39/ you may easily check what to expect for the given seed.
-By default program uses P2PKH script semantics (addresses like 1...), but script could be defined in the 'address' line, after the comma - please check file example4.conf.
+By default program uses P2PKH script semantics for addresses like "1..." and P2WPKH for addresses like "bc1...".
 
 Contact
 -------

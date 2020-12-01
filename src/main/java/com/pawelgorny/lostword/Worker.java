@@ -61,15 +61,16 @@ public class Worker {
                 mnemonic.set(p++, iterator.next());
             }
             final CountDownLatch latch = new CountDownLatch(THREADS);
-            ExecutorService executorService = Executors.newFixedThreadPool(THREADS);
+            final ExecutorService executorService = Executors.newFixedThreadPool(THREADS);
             for (int t = 0; t < THREADS; t++) {
                 final int WORKING_POSITION = position;
                 final List<String> WORDS_TO_WORK = DICTIONARY.get(t);
+                final List<String> SEED = new ArrayList<>(mnemonic);
                 executorService.submit(() -> {
                     try {
                         for (int bipPosition = 0; RESULT == null && bipPosition < WORDS_TO_WORK.size(); bipPosition++) {
-                            mnemonic.set(WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
-                            if (check(mnemonic)) {
+                            SEED.set(WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
+                            if (check(SEED)) {
                                 RESULT = new Result(1 + WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
                             }
                         }
@@ -87,7 +88,7 @@ public class Worker {
     private List<List<String>> split() {
         List<List<String>> result = new ArrayList<>(THREADS);
         for (int i = 0; i < THREADS; i++) {
-            result.add(new ArrayList<>());
+            result.add(new ArrayList<>(Configuration.MNEMONIC_CODE.getWordList().size() / THREADS));
         }
         for (int w = 0; w < Configuration.MNEMONIC_CODE.getWordList().size(); w++) {
             int n = w % THREADS;
@@ -101,6 +102,7 @@ public class Worker {
         DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, new ChildNumber(configuration.getDPaccount(), false));
         DeterministicKey new_address_key = HDKeyDerivation.deriveChildKey(receiving, new ChildNumber(configuration.getDPaddress(), configuration.isDPhard()));
         if (configuration.getTargetAddress().equalsIgnoreCase(Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, configuration.getDBscriptType()).toString())) {
+            System.out.println(mnemonic);
             return true;
         }
         return false;
