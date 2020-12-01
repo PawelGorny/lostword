@@ -1,6 +1,7 @@
 package com.pawelgorny.lostword;
 
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.script.Script;
@@ -12,6 +13,8 @@ public final class Configuration {
     final static MnemonicCode MNEMONIC_CODE = getMnemonicCode();
     private final NetworkParameters NETWORK_PARAMETERS = MainNetParams.get();
     private final String DEFAULT_PATH = "m/0/0";
+    private final ChildNumber DPchild0;
+    private final ChildNumber DPchild1;
     private String targetAddress;
     private int SIZE;
     private List<String> WORDS;
@@ -25,6 +28,9 @@ public final class Configuration {
         this.SIZE = words.size() + 1;
         parsePath(path);
         parseScript(targetAddress);
+
+        DPchild0 = new ChildNumber(getDPaccount(), false);
+        DPchild1 = new ChildNumber(getDPaddress(), isDPhard());
     }
 
     private static MnemonicCode getMnemonicCode() {
@@ -105,5 +111,13 @@ public final class Configuration {
 
     public Script.ScriptType getDBscriptType() {
         return DBscriptType;
+    }
+
+    public ChildNumber getDPchild0() {
+        return DPchild0;
+    }
+
+    public ChildNumber getDPchild1() {
+        return DPchild1;
     }
 }

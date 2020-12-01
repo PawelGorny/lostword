@@ -1,7 +1,10 @@
 package com.pawelgorny.lostword;
 
 import org.bitcoinj.core.Address;
-import org.bitcoinj.crypto.*;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.HDKeyDerivation;
+import org.bitcoinj.crypto.MnemonicCode;
+import org.bitcoinj.crypto.MnemonicException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,9 +50,7 @@ public class Worker {
         for (int i = 0; i < configuration.getSIZE(); i++) {
             mnemonic.add("");
         }
-
         final List<List<String>> DICTIONARY = split();
-
         for (int position = 0; position <= configuration.getSIZE() && RESULT == null; position++) {
             System.out.println("Checking missing word at position " + (position + 1));
             Iterator<String> iterator = configuration.getWORDS().iterator();
@@ -97,10 +98,15 @@ public class Worker {
         return result;
     }
 
-    private boolean check(List<String> mnemonic) throws MnemonicException {
+    private boolean check(final List<String> mnemonic) throws MnemonicException {
+        try {
+            Configuration.MNEMONIC_CODE.check(mnemonic);
+        } catch (MnemonicException.MnemonicChecksumException checksumException) {
+            return false;
+        }
         DeterministicKey deterministicKey = HDKeyDerivation.createMasterPrivateKey(MnemonicCode.toSeed(mnemonic, ""));
-        DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, new ChildNumber(configuration.getDPaccount(), false));
-        DeterministicKey new_address_key = HDKeyDerivation.deriveChildKey(receiving, new ChildNumber(configuration.getDPaddress(), configuration.isDPhard()));
+        DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, configuration.getDPchild0());
+        DeterministicKey new_address_key = HDKeyDerivation.deriveChildKey(receiving, configuration.getDPchild1());
         if (configuration.getTargetAddress().equalsIgnoreCase(Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, configuration.getDBscriptType()).toString())) {
             System.out.println(mnemonic);
             return true;
