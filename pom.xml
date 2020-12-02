@@ -6,7 +6,7 @@
 
     <groupId>com.pawelgorny</groupId>
     <artifactId>lostword</artifactId>
-    <version>0.4s</version>
+    <version>0.5</version>
     <packaging>jar</packaging>
 
     <dependencies>

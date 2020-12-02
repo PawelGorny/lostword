@@ -10,6 +10,7 @@ import java.util.List;
 
 public final class Configuration {
     final static String COMMENT_CHAR = "#";
+    final static String UNKNOWN_CHAR = "?";
     final static MnemonicCode MNEMONIC_CODE = getMnemonicCode();
     private final NetworkParameters NETWORK_PARAMETERS = MainNetParams.get();
     private final String DEFAULT_PATH = "m/0/0";
@@ -23,9 +24,15 @@ public final class Configuration {
     private boolean DPhard = false;
     private Script.ScriptType DBscriptType = Script.ScriptType.P2PKH;
 
-    public Configuration(String targetAddress, String path, List<String> words) {
+    private final WORK work;
+
+    public Configuration(WORK work, String targetAddress, String path, List<String> words) {
+        this.work = work;
         this.WORDS = words;
-        this.SIZE = words.size() + 1;
+        this.SIZE = words.size();
+        if (WORK.ONE_UNKNOWN.equals(work)){
+            this.SIZE++;
+        }
         parsePath(path);
         parseScript(targetAddress);
 
@@ -119,5 +126,9 @@ public final class Configuration {
 
     public ChildNumber getDPchild1() {
         return DPchild1;
+    }
+
+    public WORK getWork() {
+        return work;
     }
 }

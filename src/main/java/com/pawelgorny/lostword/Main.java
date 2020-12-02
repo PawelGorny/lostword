@@ -50,6 +50,7 @@ public class Main {
         String targetAddress = null;
         List<String> words = new ArrayList<>(0);
         String path = null;
+        WORK work = null;
         try {
             while ((line = bufferReader.readLine()) != null) {
                 line = line.trim();
@@ -58,9 +59,12 @@ public class Main {
                 }
                 switch (lineNumber) {
                     case 0:
-                        targetAddress = line;
+                        work = WORK.valueOf(line);
                         break;
                     case 1:
+                        targetAddress = line;
+                        break;
+                    case 2:
                         try {
                             Integer.parseInt(line);
                         } catch (NumberFormatException e) {
@@ -68,17 +72,29 @@ public class Main {
                             System.exit(1);
                         }
                         size = Integer.valueOf(line);
-                        words = new ArrayList<>(size - 1);
+                        words = new ArrayList<>(size);
                         break;
                     default:
-                        if (words.size() == size - 1) {
-                            path = line;
-                        } else if (words.size() < size - 1) {
-                            if (!Configuration.MNEMONIC_CODE.getWordList().contains(line)) {
-                                System.out.println("WORD not in BIP39: " + line);
-                                System.exit(1);
+                        if (WORK.ONE_UNKNOWN.equals(work)){
+                            if (words.size() == size - 1) {
+                                path = line;
+                            } else if (words.size() < size - 1) {
+                                if (!Configuration.MNEMONIC_CODE.getWordList().contains(line)) {
+                                    System.out.println("WORD not in BIP39: " + line);
+                                    System.exit(1);
+                                }
+                                words.add(line);
                             }
-                            words.add(line);
+                        }else if (WORK.KNOWN_POSITION.equals(work)){
+                            if (words.size() == size) {
+                                path = line;
+                            }else if (words.size() < size) {
+                                if (!Configuration.UNKNOWN_CHAR.equalsIgnoreCase(line) && !Configuration.MNEMONIC_CODE.getWordList().contains(line)) {
+                                    System.out.println("WORD not in BIP39: " + line);
+                                    System.exit(1);
+                                }
+                                words.add(line);
+                            }
                         }
                         break;
                 }
@@ -98,6 +114,6 @@ public class Main {
                 //file problem?
             }
         }
-        return new Configuration(targetAddress, path, words);
+        return new Configuration(work, targetAddress, path, words);
     }
 }

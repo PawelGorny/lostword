@@ -1,5 +1,8 @@
 Usage:
-java -jar lostword.jar input.conf
+java -jar lostWord.jar input.conf
 
-
+Available solvers:
+ONE_UNKNOWN - seed with one unknown word, on unknown position
+KNOWN_POSITION - seed with one or more unknown word, on known position
+For details, please check the corresponding example files.
 
