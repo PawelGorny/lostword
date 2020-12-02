@@ -16,6 +16,38 @@ It is possible to launch tests against 'hardened' addresses, using ' (apostrophe
 Using page https://iancoleman.io/bip39/ you may easily check what to expect for the given seed.
 By default program uses P2PKH script semantics for addresses like "1..." and P2WPKH for addresses like "bc1...".
 
+Program could be launched in 2 modes:
+<ol>
+<li>ONE_UNKNOWN</li>
+Suitable for seeds where we know the number of words, we know order of words, but we do not know one word.
+Program checks seeds testing a 'lost' word on each position.
+Configuration file example (seed with 6 words, one word missing):
+
+    ONE_UNKNOWN
+    1AcuLxsQSMTi6fLEbJ6F6sNsZ4NyqnUNSo
+    6
+    brother
+    medal
+    remove
+    pitch
+    hill
+
+<li>KNOWN_POSITION</li>
+Suitable for seeds where we know the number of words, we know order of words, we do not know one or more words, but we know position of lost word(s).
+Program checks seeds testing a 'lost' word(s) on specified position(s).
+Configuration file example (seed with 6 words, three first words are missing):
+
+    KNOWN_POSITION
+    bc1q8ctl93aqztw8z3jsfhzcl0hlukq9pc7jclmmt0
+    6
+    ?
+    ?
+    ?
+    home
+    car
+    test
+</ol>
+
 Contact
 -------
 Contact email: crypto@pawelgorny.com
