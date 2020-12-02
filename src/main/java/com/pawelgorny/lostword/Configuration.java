@@ -23,10 +23,11 @@ public final class Configuration {
     private int DPaddress = 0;
     private boolean DPhard = false;
     private Script.ScriptType DBscriptType = Script.ScriptType.P2PKH;
+    private int knownStart = 0;
 
     private final WORK work;
 
-    public Configuration(WORK work, String targetAddress, String path, List<String> words) {
+    public Configuration(WORK work, String targetAddress, String path, List<String> words, int knownStarter) {
         this.work = work;
         this.WORDS = words;
         this.SIZE = words.size();
@@ -38,6 +39,7 @@ public final class Configuration {
 
         DPchild0 = new ChildNumber(getDPaccount(), false);
         DPchild1 = new ChildNumber(getDPaddress(), isDPhard());
+        this.knownStart = knownStarter;
     }
 
     private static MnemonicCode getMnemonicCode() {
@@ -130,5 +132,9 @@ public final class Configuration {
 
     public WORK getWork() {
         return work;
+    }
+
+    public int getKnownStart() {
+        return knownStart;
     }
 }

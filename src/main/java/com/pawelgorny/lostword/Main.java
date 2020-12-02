@@ -51,6 +51,7 @@ public class Main {
         List<String> words = new ArrayList<>(0);
         String path = null;
         WORK work = null;
+        int knownStarter = 0;
         try {
             while ((line = bufferReader.readLine()) != null) {
                 line = line.trim();
@@ -89,9 +90,19 @@ public class Main {
                             if (words.size() == size) {
                                 path = line;
                             }else if (words.size() < size) {
-                                if (!Configuration.UNKNOWN_CHAR.equalsIgnoreCase(line) && !Configuration.MNEMONIC_CODE.getWordList().contains(line)) {
+                                if (!line.startsWith(Configuration.UNKNOWN_CHAR) && !Configuration.MNEMONIC_CODE.getWordList().contains(line)) {
                                     System.out.println("WORD not in BIP39: " + line);
                                     System.exit(1);
+                                }
+                                if (line.startsWith(Configuration.UNKNOWN_CHAR)){
+                                    if (!Configuration.UNKNOWN_CHAR.equals(line)){
+                                        if (!Configuration.MNEMONIC_CODE.getWordList().contains(line.substring(1).trim())){
+                                            System.out.println("WORD not in BIP39: " + line);
+                                            System.exit(1);
+                                        }
+                                        knownStarter = Configuration.MNEMONIC_CODE.getWordList().indexOf(line.substring(1).trim());
+                                        line = Configuration.UNKNOWN_CHAR;
+                                    }
                                 }
                                 words.add(line);
                             }
@@ -114,6 +125,6 @@ public class Main {
                 //file problem?
             }
         }
-        return new Configuration(work, targetAddress, path, words);
+        return new Configuration(work, targetAddress, path, words, knownStarter);
     }
 }

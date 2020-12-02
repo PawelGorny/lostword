@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 
 public class Worker {
 
+    protected final int DICTIONARY_SIZE = Configuration.MNEMONIC_CODE.getWordList().size();
     protected static Result RESULT = null;
     protected final Configuration configuration;
     protected int THREADS = 2;
@@ -76,9 +77,9 @@ public class Worker {
     protected List<List<String>> split() {
         List<List<String>> result = new ArrayList<>(THREADS);
         for (int i = 0; i < THREADS; i++) {
-            result.add(new ArrayList<>(Configuration.MNEMONIC_CODE.getWordList().size() / THREADS));
+            result.add(new ArrayList<>(DICTIONARY_SIZE / THREADS));
         }
-        for (int w = 0; w < Configuration.MNEMONIC_CODE.getWordList().size(); w++) {
+        for (int w = 0; w < DICTIONARY_SIZE; w++) {
             int n = w % THREADS;
             result.get(n).add(Configuration.MNEMONIC_CODE.getWordList().get(w));
         }

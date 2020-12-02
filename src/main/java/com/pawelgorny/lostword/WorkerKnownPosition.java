@@ -46,7 +46,7 @@ public class WorkerKnownPosition extends Worker{
 
     private int getNextUnknown(int last, List<String> list){
         for (int p0=(1+last); p0<list.size(); p0++){
-            if (Configuration.UNKNOWN_CHAR.equalsIgnoreCase(list.get(p0))){
+            if (Configuration.UNKNOWN_CHAR.equals(list.get(p0))){
                 return p0;
             }
         }
@@ -54,14 +54,14 @@ public class WorkerKnownPosition extends Worker{
     }
 
     private void checkUnknown(int position) throws InterruptedException {
-        System.out.println("Warning: "+((Double)Math.pow(Configuration.MNEMONIC_CODE.getWordList().size(), NUMBER_UNKNOWN)).longValue()+" possibilities!");
+        System.out.println("Warning: "+((Double)Math.pow(DICTIONARY_SIZE, NUMBER_UNKNOWN)).longValue()+" possibilities!");
         List<String> mnemonic = new ArrayList<>(configuration.getWORDS());
-        int dicsize = Configuration.MNEMONIC_CODE.getWordList().size();
         List<List<String>> DICTIONARY = split();
         int nextPosition = getNextUnknown(position, configuration.getWORDS());
-        for (int w0=0; RESULT==null && w0<dicsize; w0++){
-            System.out.println("Processing word "+(w0+1)+"/"+dicsize+" on position "+(position+1)+"! "+SDF.format(new Date()));
-            mnemonic.set(position, Configuration.MNEMONIC_CODE.getWordList().get(w0));
+        for (int w0=configuration.getKnownStart(); RESULT==null && w0<DICTIONARY_SIZE; w0++){
+            String processedWord = Configuration.MNEMONIC_CODE.getWordList().get(w0);
+            System.out.println("Processing word "+(w0+1)+"/"+DICTIONARY_SIZE+" on position "+(position+1)+"! '"+processedWord+"' "+SDF.format(new Date()));
+            mnemonic.set(position, processedWord);
             final CountDownLatch latch = new CountDownLatch(THREADS);
             final ExecutorService executorService = Executors.newFixedThreadPool(THREADS);
             for (int t = 0; t < THREADS; t++) {
@@ -100,10 +100,11 @@ public class WorkerKnownPosition extends Worker{
                 start = System.currentTimeMillis();
             }
         }else{
-            int nextPosition = getNextUnknown(positionSet, seed);
-            for (int w = 0; RESULT==null && w<Configuration.MNEMONIC_CODE.getWordList().size(); w++){
-                seed.set(nextPosition, Configuration.MNEMONIC_CODE.getWordList().get(w));
-                processSeed(seed, (depth+1), nextPosition, reporter);
+            int position = getNextUnknown(positionSet, seed);
+            int nextDepth = depth+1;
+            for (int w = 0; RESULT==null && w<DICTIONARY_SIZE; w++){
+                seed.set(position, Configuration.MNEMONIC_CODE.getWordList().get(w));
+                processSeed(seed, nextDepth, position, reporter);
             }
         }
     }

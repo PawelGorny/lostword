@@ -46,6 +46,20 @@ Configuration file example (seed with 6 words, three first words are missing):
     home
     car
     test
+
+It is possible to resume search from the specific word on the first unknown position. For example:
+
+    KNOWN_POSITION
+    bc1q04v0u7sy29tu3g6a0zwldlthjms2u00p0ucq7q
+    6
+    ?ability
+    ?
+    ?
+    home
+    car
+    that
+
+
 </ol>
 
 Contact
