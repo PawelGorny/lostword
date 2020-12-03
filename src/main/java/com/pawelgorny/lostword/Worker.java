@@ -1,10 +1,11 @@
 package com.pawelgorny.lostword;
 
 import org.bitcoinj.core.Address;
+import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
+import org.bitcoinj.crypto.PBKDF2SHA512;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ public class Worker {
     protected final Configuration configuration;
     protected int THREADS = 2;
     protected final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    private static final String SALT = "mnemonic";
 
     public Worker(Configuration configuration) {
         this.configuration = configuration;
@@ -64,7 +67,8 @@ public class Worker {
         } catch (MnemonicException.MnemonicChecksumException checksumException) {
             return false;
         }
-        DeterministicKey deterministicKey = HDKeyDerivation.createMasterPrivateKey(MnemonicCode.toSeed(mnemonic, ""));
+        byte[] seed = PBKDF2SHA512.derive(Utils.SPACE_JOINER.join(mnemonic), SALT, 2048, 64);
+        DeterministicKey deterministicKey = HDKeyDerivation.createMasterPrivateKey(seed);
         DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, configuration.getDPchild0());
         DeterministicKey new_address_key = HDKeyDerivation.deriveChildKey(receiving, configuration.getDPchild1());
         if (configuration.getTargetAddress().equalsIgnoreCase(Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, configuration.getDBscriptType()).toString())) {

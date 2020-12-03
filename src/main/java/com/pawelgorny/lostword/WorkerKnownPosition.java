@@ -44,8 +44,8 @@ public class WorkerKnownPosition extends Worker{
         }
     }
 
-    private int getNextUnknown(int last, List<String> list){
-        for (int p0=(1+last); p0<list.size(); p0++){
+    private int getNextUnknown(int startSearch, List<String> list){
+        for (int p0=startSearch; p0<list.size(); p0++){
             if (Configuration.UNKNOWN_CHAR.equals(list.get(p0))){
                 return p0;
             }
@@ -57,7 +57,7 @@ public class WorkerKnownPosition extends Worker{
         System.out.println("Warning: "+((Double)Math.pow(DICTIONARY_SIZE, NUMBER_UNKNOWN)).longValue()+" possibilities!");
         List<String> mnemonic = new ArrayList<>(configuration.getWORDS());
         List<List<String>> DICTIONARY = split();
-        int nextPosition = getNextUnknown(position, configuration.getWORDS());
+        int nextPosition = getNextUnknown(1+position, configuration.getWORDS());
         for (int w0=configuration.getKnownStart(); RESULT==null && w0<DICTIONARY_SIZE; w0++){
             String processedWord = Configuration.MNEMONIC_CODE.getWordList().get(w0);
             System.out.println("Processing word "+(w0+1)+"/"+DICTIONARY_SIZE+" on position "+(position+1)+"! '"+processedWord+"' "+SDF.format(new Date()));
@@ -74,9 +74,10 @@ public class WorkerKnownPosition extends Worker{
                         start = System.currentTimeMillis();
                     }
                     try {
+                        int WORKING_POSITION_PLUS = WORKING_POSITION+1;
                         for (int bipPosition = 0; RESULT == null && bipPosition < WORDS_TO_WORK.size(); bipPosition++) {
                             SEED.set(WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
-                            processSeed(SEED, 2, WORKING_POSITION, REPORTER);
+                            processSeed(SEED, 2, WORKING_POSITION_PLUS, REPORTER);
                         }
                     } catch (Exception e) {
                         Thread.currentThread().interrupt();
@@ -89,7 +90,7 @@ public class WorkerKnownPosition extends Worker{
         }
     }
 
-    private void processSeed(final List<String> seed, int depth, int positionSet, boolean reporter) throws MnemonicException {
+    private void processSeed(final List<String> seed, int depth, int positionStartSearch, boolean reporter) throws MnemonicException {
         if (NUMBER_UNKNOWN==depth){
             if (check(seed)){
                 RESULT = new Result(seed);
@@ -100,11 +101,15 @@ public class WorkerKnownPosition extends Worker{
                 start = System.currentTimeMillis();
             }
         }else{
-            int position = getNextUnknown(positionSet, seed);
-            int nextDepth = depth+1;
+            int position = getNextUnknown(positionStartSearch, seed);
+            int positionStartNextSearch = 0;
+            int nextDepth = depth + 1;
+            if (nextDepth <NUMBER_UNKNOWN ){
+                positionStartNextSearch = position+1;
+            }
             for (int w = 0; RESULT==null && w<DICTIONARY_SIZE; w++){
                 seed.set(position, Configuration.MNEMONIC_CODE.getWordList().get(w));
-                processSeed(seed, nextDepth, position, reporter);
+                processSeed(seed, nextDepth, positionStartNextSearch, reporter);
             }
         }
     }
