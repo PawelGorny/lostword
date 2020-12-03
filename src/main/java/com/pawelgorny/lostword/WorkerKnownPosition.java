@@ -1,6 +1,7 @@
 package com.pawelgorny.lostword;
 
 import org.bitcoinj.crypto.MnemonicException;
+import org.bouncycastle.crypto.macs.HMac;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,7 +20,7 @@ public class WorkerKnownPosition extends Worker{
         super(configuration);
     }
 
-    void run() throws InterruptedException, MnemonicException {
+    public void run() throws InterruptedException, MnemonicException {
         check();
     }
 
@@ -73,11 +74,12 @@ public class WorkerKnownPosition extends Worker{
                     if (REPORTER) {
                         start = System.currentTimeMillis();
                     }
+                    final HMac SHA_512_DIGEST = createHmacSha512Digest();
                     try {
                         int WORKING_POSITION_PLUS = WORKING_POSITION+1;
                         for (int bipPosition = 0; RESULT == null && bipPosition < WORDS_TO_WORK.size(); bipPosition++) {
                             SEED.set(WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
-                            processSeed(SEED, 2, WORKING_POSITION_PLUS, REPORTER);
+                            processSeed(SEED, 2, WORKING_POSITION_PLUS, REPORTER, SHA_512_DIGEST);
                         }
                     } catch (Exception e) {
                         Thread.currentThread().interrupt();
@@ -90,9 +92,10 @@ public class WorkerKnownPosition extends Worker{
         }
     }
 
-    private void processSeed(final List<String> seed, int depth, int positionStartSearch, boolean reporter) throws MnemonicException {
+    private void processSeed(final List<String> seed, int depth, int positionStartSearch, boolean reporter, HMac SHA_512_DIGEST) throws MnemonicException {
         if (NUMBER_UNKNOWN==depth){
-            if (check(seed)){
+            if (check(seed, SHA_512_DIGEST)){
+                System.out.println(seed);
                 RESULT = new Result(seed);
                 return;
             }
@@ -109,7 +112,7 @@ public class WorkerKnownPosition extends Worker{
             }
             for (int w = 0; RESULT==null && w<DICTIONARY_SIZE; w++){
                 seed.set(position, Configuration.MNEMONIC_CODE.getWordList().get(w));
-                processSeed(seed, nextDepth, positionStartNextSearch, reporter);
+                processSeed(seed, nextDepth, positionStartNextSearch, reporter, SHA_512_DIGEST);
             }
         }
     }

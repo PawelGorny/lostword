@@ -1,17 +1,16 @@
 package com.pawelgorny.lostword;
 
+import com.google.common.base.Preconditions;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Utils;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.crypto.MnemonicException;
-import org.bitcoinj.crypto.PBKDF2SHA512;
+import org.bitcoinj.crypto.*;
+import org.bitcoinj.script.Script;
+import org.bouncycastle.crypto.digests.SHA512Digest;
+import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.crypto.params.KeyParameter;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,9 +23,12 @@ public class Worker {
     protected int THREADS = 2;
     protected final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    private final byte[] BITCOIN_SEED_BYTES = "Bitcoin seed".getBytes();
+    private final HMac SHA_512_DIGEST;
+    private final long CREATION_SECONDS = Utils.currentTimeSeconds();
     private static final String SALT = "mnemonic";
 
-    public Worker(Configuration configuration) {
+    public Worker(Configuration configuration)  {
         this.configuration = configuration;
         int procs = Runtime.getRuntime().availableProcessors();
         if (procs > 1) {
@@ -35,9 +37,10 @@ public class Worker {
             }
             THREADS = procs;
         }
+        SHA_512_DIGEST = createHmacSha512Digest();
     }
 
-    void run() throws InterruptedException, MnemonicException {
+    public void run() throws InterruptedException, MnemonicException {
         Worker worker = null;
         switch (configuration.getWork()){
             case ONE_UNKNOWN:
@@ -62,20 +65,55 @@ public class Worker {
     }
 
     protected boolean check(final List<String> mnemonic) throws MnemonicException {
+        return check(mnemonic, null);
+    }
+
+    protected boolean check(final List<String> mnemonic, HMac SHA512DIGEST) throws MnemonicException {
         try {
             Configuration.MNEMONIC_CODE.check(mnemonic);
         } catch (MnemonicException.MnemonicChecksumException checksumException) {
             return false;
         }
         byte[] seed = PBKDF2SHA512.derive(Utils.SPACE_JOINER.join(mnemonic), SALT, 2048, 64);
-        DeterministicKey deterministicKey = HDKeyDerivation.createMasterPrivateKey(seed);
+        DeterministicKey deterministicKey = createMasterPrivateKey(seed, SHA512DIGEST==null?this.SHA_512_DIGEST:SHA512DIGEST);
         DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, configuration.getDPchild0());
         DeterministicKey new_address_key = HDKeyDerivation.deriveChildKey(receiving, configuration.getDPchild1());
-        if (configuration.getTargetAddress().equalsIgnoreCase(Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, configuration.getDBscriptType()).toString())) {
-            System.out.println(mnemonic);
-            return true;
+        if (configuration.getDBscriptType().equals(Script.ScriptType.P2WPKH)){
+            return Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, configuration.getDBscriptType()).equals(configuration.getSegwitAddress());
         }
-        return false;
+        return Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, configuration.getDBscriptType()).equals(configuration.getLegacyAddress());
+//        if (configuration.getTargetAddress().equalsIgnoreCase(Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, configuration.getDBscriptType()).toString())) {
+////            System.out.println(mnemonic);
+//            return true;
+//        }
+//        return false;
+    }
+
+    public HMac createHmacSha512Digest() {
+        SHA512Digest digest = new SHA512Digest();
+        HMac hMac = new HMac(digest);
+        hMac.init(new KeyParameter(BITCOIN_SEED_BYTES));
+        return hMac;
+    }
+    private byte[] hmacSha512(HMac hmacSha512, byte[] input) {
+        hmacSha512.reset();
+        hmacSha512.update(input, 0, input.length);
+        byte[] out = new byte[64];
+        hmacSha512.doFinal(out, 0);
+        return out;
+    }
+
+    private DeterministicKey createMasterPrivateKey(byte[] seed, HMac SHA512DIGEST) throws HDDerivationException {
+        byte[] i = hmacSha512(SHA512DIGEST, seed);
+        Preconditions.checkState(i.length == 64, Integer.valueOf(i.length));
+        byte[] il = Arrays.copyOfRange(i, 0, 32);
+        byte[] ir = Arrays.copyOfRange(i, 32, 64);
+        Arrays.fill(i, (byte)0);
+        DeterministicKey masterPrivKey = HDKeyDerivation.createMasterPrivKeyFromBytes(il, ir);
+        Arrays.fill(il, (byte)0);
+        Arrays.fill(ir, (byte)0);
+        masterPrivKey.setCreationTimeSeconds(CREATION_SECONDS);
+        return masterPrivKey;
     }
 
     protected List<List<String>> split() {

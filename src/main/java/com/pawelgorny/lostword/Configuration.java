@@ -1,6 +1,8 @@
 package com.pawelgorny.lostword;
 
+import org.bitcoinj.core.LegacyAddress;
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.SegwitAddress;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.params.MainNetParams;
@@ -10,7 +12,7 @@ import java.util.List;
 
 public final class Configuration {
     final static String COMMENT_CHAR = "#";
-    final static String UNKNOWN_CHAR = "?";
+    public final static String UNKNOWN_CHAR = "?";
     final static MnemonicCode MNEMONIC_CODE = getMnemonicCode();
     private final NetworkParameters NETWORK_PARAMETERS = MainNetParams.get();
     private final String DEFAULT_PATH = "m/0/0";
@@ -24,6 +26,9 @@ public final class Configuration {
     private boolean DPhard = false;
     private Script.ScriptType DBscriptType = Script.ScriptType.P2PKH;
     private int knownStart = 0;
+
+    private LegacyAddress legacyAddress;
+    private SegwitAddress segwitAddress;
 
     private final WORK work;
 
@@ -68,6 +73,14 @@ public final class Configuration {
             if (this.targetAddress.startsWith("bc1")) {
                 DBscriptType = Script.ScriptType.P2WPKH;
             }
+        }
+        switch (getDBscriptType()){
+            case P2PKH:
+                legacyAddress = LegacyAddress.fromBase58(getNETWORK_PARAMETERS(), getTargetAddress());
+                break;
+            case P2WPKH:
+                segwitAddress = SegwitAddress.fromBech32(getNETWORK_PARAMETERS(), getTargetAddress());
+                break;
         }
         System.out.println("Using script " + DBscriptType);
     }
@@ -136,5 +149,21 @@ public final class Configuration {
 
     public int getKnownStart() {
         return knownStart;
+    }
+
+    public LegacyAddress getLegacyAddress() {
+        return legacyAddress;
+    }
+
+    public void setLegacyAddress(LegacyAddress legacyAddress) {
+        this.legacyAddress = legacyAddress;
+    }
+
+    public SegwitAddress getSegwitAddress() {
+        return segwitAddress;
+    }
+
+    public void setSegwitAddress(SegwitAddress segwitAddress) {
+        this.segwitAddress = segwitAddress;
     }
 }
