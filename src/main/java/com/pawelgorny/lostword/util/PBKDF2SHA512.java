@@ -16,10 +16,14 @@ public class PBKDF2SHA512 {
             SecretKeySpec key = new SecretKeySpec(mnemonicBytes, mac.getAlgorithm());
             mac.init(key);
 
-            for(int i = 1; i <= 4; ++i) {
-                byte[] T = F(salt, c, i, mac);
-                baos.write(T);
-            }
+            byte[] T = F(salt, c, (byte)1, mac);
+            baos.write(T);
+
+//            for(byte i = 1; i <= 4; ++i) {
+//                byte[] T = F(salt, c, i, mac);
+//                baos.write(T);
+//                break;
+//            }
         } catch (Exception var9) {
             throw new RuntimeException(var9);
         }
@@ -30,17 +34,18 @@ public class PBKDF2SHA512 {
         return var10;
     }
 
-    private static byte[] F(byte[] salt, int c, int i, Mac mac) throws Exception {
+    private static byte[] F(byte[] salt, int c, byte i, Mac mac) throws Exception {
         byte[] U_LAST = null;
         byte[] U_XOR = null;
         for(int j = 0; j < c; ++j) {
             byte[] baU;
             if(j == 0) {
                 baU = salt;
-                byte[] var12 = INT(i);
+//                byte[] var12 = INT(i);
                 byte[] baU1 = new byte[12];
                 System.arraycopy(baU, 0, baU1, 0, 8);
-                System.arraycopy(var12, 0, baU1, 8, 4);
+//                System.arraycopy(var12, 0, baU1, 8, 4);
+                baU1[11] = i;
                 U_XOR = mac.doFinal(baU1);
                 U_LAST = U_XOR;
             } else {

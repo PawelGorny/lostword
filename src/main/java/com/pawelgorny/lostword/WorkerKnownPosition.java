@@ -4,7 +4,6 @@ import org.bitcoinj.crypto.MnemonicException;
 import org.bouncycastle.crypto.macs.HMac;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -61,6 +60,17 @@ public class WorkerKnownPosition extends Worker{
         List<String> mnemonic = new ArrayList<>(configuration.getWORDS());
         List<List<String>> DICTIONARY = split();
         int nextPosition = getNextUnknown(1+position, configuration.getWORDS());
+
+        final List<MessageDigest> SHA_256_DIGESTS= new ArrayList<>(THREADS);
+        final List<HMac> SHA_512_DIGESTS= new ArrayList<>(THREADS);
+        for (int t=0; t<THREADS; t++){
+            try {
+                SHA_512_DIGESTS.add(createHmacSha512Digest());
+                SHA_256_DIGESTS.add(MessageDigest.getInstance("SHA-256"));
+            }catch (Exception e){
+            }
+        }
+
         for (int w0=configuration.getKnownStart(); RESULT==null && w0<DICTIONARY_SIZE; w0++){
             String processedWord = Configuration.MNEMONIC_CODE.getWordList().get(w0);
             System.out.println("Processing word "+(w0+1)+"/"+DICTIONARY_SIZE+" on position "+(position+1)+"! '"+processedWord+"' "+SDF.format(new Date()));
@@ -72,17 +82,13 @@ public class WorkerKnownPosition extends Worker{
                 final List<String> SEED = new ArrayList<>(mnemonic);
                 final List<String> WORDS_TO_WORK = DICTIONARY.get(t);
                 final boolean REPORTER = t==0;
+                final int T_NUMBER=t;
                 executorService.submit(() -> {
                     if (REPORTER) {
                         start = System.currentTimeMillis();
                     }
-                    final HMac LOCAL_SHA_512_DIGEST = createHmacSha512Digest();
-                    final MessageDigest LOCAL_SHA_256_DIGEST;
-                    try {
-                        LOCAL_SHA_256_DIGEST = MessageDigest.getInstance("SHA-256");
-                    } catch (NoSuchAlgorithmException var1) {
-                        throw new RuntimeException(var1);
-                    }
+                    final HMac LOCAL_SHA_512_DIGEST = SHA_512_DIGESTS.get(T_NUMBER);
+                    final MessageDigest LOCAL_SHA_256_DIGEST = SHA_256_DIGESTS.get(T_NUMBER);
                     try {
                         int WORKING_POSITION_PLUS = WORKING_POSITION+1;
                         for (int bipPosition = 0; RESULT == null && bipPosition < WORDS_TO_WORK.size(); bipPosition++) {
