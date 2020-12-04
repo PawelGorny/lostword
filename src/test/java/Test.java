@@ -3,7 +3,10 @@ import com.pawelgorny.lostword.Configuration;
 import com.pawelgorny.lostword.WORK;
 import com.pawelgorny.lostword.Worker;
 import org.bitcoinj.crypto.MnemonicException;
+import org.bouncycastle.crypto.macs.HMac;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +31,43 @@ public class Test {
         WorkerTester workerTester = new WorkerTester(configuration);
         assertTrue(workerTester.check(RESULT));
         System.out.println("worker.check OK");
+    }
+
+    @org.junit.Test
+    public void testLoopCheck() throws MnemonicException, NoSuchAlgorithmException {
+        Configuration configuration = new Configuration(null, TARGET, PATH, RESULT, 0);
+        WorkerTester workerTester = new WorkerTester(configuration);
         Stopwatch stopwatch = Stopwatch.createStarted();
         for (int i=0; i<LOOP_SIZE; i++){
             workerTester.check(RESULT);
+        }
+        stopwatch.stop();
+        System.out.println(stopwatch.elapsed());
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+
+        stopwatch = Stopwatch.createStarted();
+        for (int i=0; i<LOOP_SIZE; i++){
+            workerTester.check(RESULT, null, sha256);
+        }
+        stopwatch.stop();
+        System.out.println(stopwatch.elapsed());
+
+    }
+    @org.junit.Test
+    public void testLoopChecksum() throws MnemonicException, NoSuchAlgorithmException {
+        Configuration configuration = new Configuration(null, TARGET, PATH, RESULT, 0);
+        WorkerTester workerTester = new WorkerTester(configuration);
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        for (int i=0; i<LOOP_SIZE; i++){
+            workerTester.checksumCheck(RESULT, null);
+        }
+        stopwatch.stop();
+        System.out.println(stopwatch.elapsed());
+
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        stopwatch = Stopwatch.createStarted();
+        for (int i=0; i<LOOP_SIZE; i++){
+            workerTester.checksumCheck(RESULT, sha256);
         }
         stopwatch.stop();
         System.out.println(stopwatch.elapsed());
@@ -84,6 +121,16 @@ public class Test {
         @Override
         protected boolean check(List<String> mnemonic) throws MnemonicException {
             return super.check(mnemonic);
+        }
+
+        @Override
+        protected boolean check(List<String> mnemonic, HMac SHA512DIGEST, MessageDigest sha256) throws MnemonicException {
+            return super.check(mnemonic, SHA512DIGEST, sha256);
+        }
+
+        @Override
+        protected boolean checksumCheck(List<String> mnemonic, MessageDigest sha256) {
+            return super.checksumCheck(mnemonic, sha256);
         }
 
         public boolean isResult(){
