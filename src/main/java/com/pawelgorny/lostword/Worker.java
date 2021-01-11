@@ -29,10 +29,11 @@ public class Worker {
     protected int THREADS = 2;
     protected final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    protected final HMac SHA_512_DIGEST;
+    protected static final byte[] SALT = "mnemonic".getBytes(StandardCharsets.UTF_8);
+
     private final byte[] BITCOIN_SEED_BYTES = "Bitcoin seed".getBytes();
-    private final HMac SHA_512_DIGEST;
     private final long CREATION_SECONDS = Utils.currentTimeSeconds();
-    private static final byte[] SALT = "mnemonic".getBytes(StandardCharsets.UTF_8);
 
     public Worker(Configuration configuration)  {
         this.configuration = configuration;
@@ -54,6 +55,9 @@ public class Worker {
                 break;
             case KNOWN_POSITION:
                 worker = new WorkerKnownPosition(configuration);
+                break;
+            case ONE_UNKNOWN_CHECK_ALL:
+                worker = new WorkerUnknownCheckAll(configuration);
                 break;
         }
         System.out.println("--- Starting worker --- "+SDF.format(new Date())+" ---");
@@ -173,7 +177,7 @@ public class Worker {
         return out;
     }
 
-    private DeterministicKey createMasterPrivateKey(byte[] seed, HMac SHA512DIGEST) throws HDDerivationException {
+    protected DeterministicKey createMasterPrivateKey(byte[] seed, HMac SHA512DIGEST) throws HDDerivationException {
         byte[] i = hmacSha512(SHA512DIGEST, seed);
         byte[] il = Arrays.copyOfRange(i, 0, 32);
         byte[] ir = Arrays.copyOfRange(i, 32, 64);

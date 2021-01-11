@@ -7,7 +7,7 @@ public class WorkerUnknown  extends Worker{
     }
 
     public void run() throws InterruptedException {
-        for (int position = 0; position <= configuration.getSIZE() && RESULT == null; position++) {
+        for (int position = 0; position < configuration.getSIZE() && RESULT == null; position++) {
             processPosition(position);
         }
     }

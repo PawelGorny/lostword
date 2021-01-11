@@ -36,7 +36,7 @@ public final class Configuration {
         this.work = work;
         this.WORDS = words;
         this.SIZE = words.size();
-        if (WORK.ONE_UNKNOWN.equals(work)){
+        if (WORK.ONE_UNKNOWN.equals(work) || WORK.ONE_UNKNOWN_CHECK_ALL.equals(work)){
             this.SIZE++;
         }
         parsePath(path);
@@ -74,13 +74,15 @@ public final class Configuration {
                 DBscriptType = Script.ScriptType.P2WPKH;
             }
         }
-        switch (getDBscriptType()){
-            case P2PKH:
-                legacyAddress = LegacyAddress.fromBase58(getNETWORK_PARAMETERS(), getTargetAddress());
-                break;
-            case P2WPKH:
-                segwitAddress = SegwitAddress.fromBech32(getNETWORK_PARAMETERS(), getTargetAddress());
-                break;
+        if (!WORK.ONE_UNKNOWN_CHECK_ALL.equals(work)){
+            switch (getDBscriptType()){
+                case P2PKH:
+                    legacyAddress = LegacyAddress.fromBase58(getNETWORK_PARAMETERS(), getTargetAddress());
+                    break;
+                case P2WPKH:
+                    segwitAddress = SegwitAddress.fromBech32(getNETWORK_PARAMETERS(), getTargetAddress());
+                    break;
+            }
         }
         System.out.println("Using script " + DBscriptType);
     }

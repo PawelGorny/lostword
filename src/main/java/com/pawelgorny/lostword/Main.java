@@ -76,7 +76,7 @@ public class Main {
                         words = new ArrayList<>(size);
                         break;
                     default:
-                        if (WORK.ONE_UNKNOWN.equals(work)){
+                        if (WORK.ONE_UNKNOWN.equals(work) || WORK.ONE_UNKNOWN_CHECK_ALL.equals(work)){
                             if (words.size() == size - 1) {
                                 path = line;
                             } else if (words.size() < size - 1) {
