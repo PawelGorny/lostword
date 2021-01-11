@@ -59,6 +59,20 @@ It is possible to resume search from the specific word on the first unknown posi
     car
     that
 
+<li>ONE_UNKNOWN_CHECK_ALL</li>
+Suitable for seeds where we know the number of words, we know order of words, but we do not know one word.
+Program checks seeds testing a 'lost' word on each position.
+This worker generates 10 addresses for the created seed and checks the balance online (using blockchain.info API).
+
+    ONE_UNKNOWN_CHECK_ALL
+    anyAddress
+    6
+    brother
+    canal
+    remove
+    pitch
+    hill
+    m/0/0'
 
 </ol>
 
