@@ -4,6 +4,7 @@ import org.bitcoinj.crypto.MnemonicException;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -49,6 +50,7 @@ public class Main {
         int size = 0;
         String targetAddress = null;
         List<String> words = new ArrayList<>(0);
+        List<List<String>> wordsPool = new ArrayList<>(0);
         String path = null;
         WORK work = null;
         int knownStarter = 0;
@@ -106,6 +108,25 @@ public class Main {
                                 }
                                 words.add(line);
                             }
+                        }else if (WORK.POOL.equals(work)){
+                            if (line.startsWith(Configuration.UNKNOWN_CHAR)){
+                                words.add(Configuration.UNKNOWN_CHAR);
+                                wordsPool.add(new ArrayList<>(Configuration.MNEMONIC_CODE.getWordList()));
+                            }else {
+                                String[] potentialWords = line.split(" ");
+                                for (int i=0; i<potentialWords.length; i++){
+                                    if (!Configuration.MNEMONIC_CODE.getWordList().contains(potentialWords[i])){
+                                        System.out.println("WORD not in BIP39: " + potentialWords[i]);
+                                        System.exit(1);
+                                    }
+                                }
+                                wordsPool.add(Arrays.asList(potentialWords));
+                                if (potentialWords.length==1){
+                                    words.add(potentialWords[0]);
+                                }else {
+                                    words.add(Configuration.UNKNOWN_CHAR);
+                                }
+                            }
                         }
                         break;
                 }
@@ -125,6 +146,10 @@ public class Main {
                 //file problem?
             }
         }
-        return new Configuration(work, targetAddress, path, words, knownStarter);
+        Configuration configuration = new Configuration(work, targetAddress, path, words, knownStarter);
+        if (WORK.POOL.equals(work)){
+            configuration.setWORDS_POOL(wordsPool);
+        }
+        return configuration;
     }
 }

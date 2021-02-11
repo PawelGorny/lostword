@@ -59,6 +59,9 @@ public class Worker {
             case ONE_UNKNOWN_CHECK_ALL:
                 worker = new WorkerUnknownCheckAll(configuration);
                 break;
+            case POOL:
+                worker = new WorkerPool(configuration);
+                break;
         }
         System.out.println("--- Starting worker --- "+SDF.format(new Date())+" ---");
         System.out.println("Expected address: '" + configuration.getTargetAddress() + "'");

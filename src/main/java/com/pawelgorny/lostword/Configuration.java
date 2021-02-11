@@ -21,6 +21,7 @@ public final class Configuration {
     private String targetAddress;
     private int SIZE;
     private List<String> WORDS;
+    private List<List<String>> WORDS_POOL;
     private int DPaccount = 0;
     private int DPaddress = 0;
     private boolean DPhard = false;
@@ -167,5 +168,14 @@ public final class Configuration {
 
     public void setSegwitAddress(SegwitAddress segwitAddress) {
         this.segwitAddress = segwitAddress;
+    }
+
+    public List<List<String>> getWORDS_POOL() {
+        return WORDS_POOL;
+    }
+
+    public void setWORDS_POOL(List<List<String>> WORDS_POOL) {
+        this.WORDS_POOL = WORDS_POOL;
+        this.SIZE = WORDS_POOL.size();
     }
 }

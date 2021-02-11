@@ -74,6 +74,22 @@ This worker generates 10 addresses for the created seed and checks the balance o
     hill
     m/0/0'
 
+<li>POOL</li>
+Suitable for seeds where we know the number of words, we know order of words and we know potential candidates on each position.
+Still '?' could be used for the whole dictionary.
+Configuration file example (seed with 6 words, one word unknown, known possible words on two positions):
+
+    POOL
+    bc1q0v5q36eaculyrykjnjsyuey6ctd3802ft4jdcc
+    6
+    brother
+    window master canal cat
+    ?
+    black master remove cat
+    pitch
+    hill
+
+
 </ol>
 
 Contact

@@ -11,13 +11,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class WorkerKnownPosition extends Worker{
+public class WorkerPool extends Worker {
 
     private static int NUMBER_UNKNOWN;
     private long start = 0;
     private static final int STATUS_PERIOD = 1000 * 60;
 
-    public WorkerKnownPosition(Configuration configuration) {
+    public WorkerPool(Configuration configuration) {
         super(configuration);
     }
 
@@ -27,39 +27,27 @@ public class WorkerKnownPosition extends Worker{
 
     private void check() throws MnemonicException, InterruptedException {
         NUMBER_UNKNOWN = 0;
+        Double possibilities = 1D;
         int position = -1;
         int c=0;
-        for (String word : configuration.getWORDS()){
-            if (Configuration.UNKNOWN_CHAR.equalsIgnoreCase(word)){
+        for (List<String> words : configuration.getWORDS_POOL()){
+            if (words.size()>1){
                 NUMBER_UNKNOWN++;
                 if (position==-1) {
                     position = c;
                 }
             }
+            possibilities = possibilities*words.size();
             c++;
         }
-        if (NUMBER_UNKNOWN == 1){
-            checkOne(position);
-        }
-        else{
-            checkUnknown(position);
-        }
-    }
-
-    private int getNextUnknown(int startSearch, List<String> list){
-        for (int p0=startSearch; p0<list.size(); p0++){
-            if (Configuration.UNKNOWN_CHAR.equals(list.get(p0))){
-                return p0;
-            }
-        }
-        return -1;
+        System.out.println("Warning: "+possibilities.longValue()+" possibilities!");
+        checkUnknown(position);
     }
 
     private void checkUnknown(int position) throws InterruptedException {
-        System.out.println("Warning: "+((Double)Math.pow(DICTIONARY_SIZE, NUMBER_UNKNOWN)).longValue()+" possibilities!");
         List<String> mnemonic = new ArrayList<>(configuration.getWORDS());
-        List<List<String>> DICTIONARY = split();
         int nextPosition = getNextUnknown(1+position, configuration.getWORDS());
+        List<List<String>> DICTIONARY = split(configuration.getWORDS_POOL().get(nextPosition));
 
         final List<MessageDigest> SHA_256_DIGESTS= new ArrayList<>(THREADS);
         final List<HMac> SHA_512_DIGESTS= new ArrayList<>(THREADS);
@@ -70,10 +58,10 @@ public class WorkerKnownPosition extends Worker{
             }catch (Exception e){
             }
         }
-
-        for (int w0=configuration.getKnownStart(); RESULT==null && w0<DICTIONARY_SIZE; w0++){
-            String processedWord = Configuration.MNEMONIC_CODE.getWordList().get(w0);
-            System.out.println("Processing word "+(w0+1)+"/"+DICTIONARY_SIZE+" on position "+(position+1)+"! '"+processedWord+"' "+SDF.format(new Date()));
+        int DIC_SIZE = configuration.getWORDS_POOL().get(position).size();
+        for (int w0=0; RESULT==null && w0<DIC_SIZE; w0++){
+            String processedWord = configuration.getWORDS_POOL().get(position).get(w0);
+            System.out.println("Processing word "+(w0+1)+"/"+DIC_SIZE+" on position "+(position+1)+"! '"+processedWord+"' "+SDF.format(new Date()));
             mnemonic.set(position, processedWord);
             final CountDownLatch latch = new CountDownLatch(THREADS);
             final ExecutorService executorService = Executors.newFixedThreadPool(THREADS);
@@ -90,8 +78,11 @@ public class WorkerKnownPosition extends Worker{
                     final HMac LOCAL_SHA_512_DIGEST = SHA_512_DIGESTS.get(T_NUMBER);
                     final MessageDigest LOCAL_SHA_256_DIGEST = SHA_256_DIGESTS.get(T_NUMBER);
                     try {
-                        int WORKING_POSITION_PLUS = WORKING_POSITION+1;
+                        int WORKING_POSITION_PLUS = WORKING_POSITION + 1;
                         for (int bipPosition = 0; RESULT == null && bipPosition < WORDS_TO_WORK.size(); bipPosition++) {
+                            if ("medal".equalsIgnoreCase(WORDS_TO_WORK.get(bipPosition))) {
+                                int d = 0;
+                            }
                             SEED.set(WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
                             processSeed(SEED, 2, WORKING_POSITION_PLUS, REPORTER, LOCAL_SHA_512_DIGEST, LOCAL_SHA_256_DIGEST);
                         }
@@ -131,15 +122,35 @@ public class WorkerKnownPosition extends Worker{
             if (nextDepth <NUMBER_UNKNOWN ){
                 positionStartNextSearch = position+1;
             }
-            for (int w = 0; RESULT==null && w<DICTIONARY_SIZE; w++){
-                seed.set(position, Configuration.MNEMONIC_CODE.getWordList().get(w));
+            for (int w = 0; RESULT==null && w<configuration.getWORDS_POOL().get(position).size(); w++){
+                seed.set(position, configuration.getWORDS_POOL().get(position).get(w));
                 processSeed(seed, nextDepth, positionStartNextSearch, reporter, SHA_512_DIGEST, SHA_256_DIGEST);
             }
             seed.set(position, Configuration.UNKNOWN_CHAR);
         }
     }
 
-    private void checkOne(int position) throws InterruptedException {
-        processPosition(position);
+    private int getNextUnknown(int startSearch, List<String> list){
+        for (int p0=startSearch; p0<list.size(); p0++){
+            if (Configuration.UNKNOWN_CHAR.equals(list.get(p0))){
+                return p0;
+            }
+        }
+        return -1;
+    }
+
+    protected List<List<String>> split(List<String> dictionary) {
+        int t = dictionary.size()>THREADS?THREADS:dictionary.size();
+        THREADS = t;
+        System.out.println("Using " + THREADS + " threads");
+        List<List<String>> result = new ArrayList<>(t);
+        for (int i = 0; i < t; i++) {
+            result.add(new ArrayList<>(dictionary.size() / t));
+        }
+        for (int w = 0; w < dictionary.size(); w++) {
+            int n = w % t;
+            result.get(n).add(dictionary.get(w));
+        }
+        return result;
     }
 }
