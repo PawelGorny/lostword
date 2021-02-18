@@ -1,6 +1,6 @@
 # LostWord
 Tool for finding missing word for BIP39 seed, having (n-1) known ordered words.
-Program works with BIP141/P2WPKH or BIP32/P2PKH Derivation Path.
+Program works with BIP84/P2WPKH or BIP32/P2PKH Derivation Path.
 
 Usage:
 `java -jar lostWord.jar configurationFile`
