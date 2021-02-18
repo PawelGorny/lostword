@@ -80,9 +80,6 @@ public class WorkerPool extends Worker {
                     try {
                         int WORKING_POSITION_PLUS = WORKING_POSITION + 1;
                         for (int bipPosition = 0; RESULT == null && bipPosition < WORDS_TO_WORK.size(); bipPosition++) {
-                            if ("medal".equalsIgnoreCase(WORDS_TO_WORK.get(bipPosition))) {
-                                int d = 0;
-                            }
                             SEED.set(WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
                             processSeed(SEED, 2, WORKING_POSITION_PLUS, REPORTER, LOCAL_SHA_512_DIGEST, LOCAL_SHA_256_DIGEST);
                         }
