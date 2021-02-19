@@ -16,7 +16,7 @@ It is possible to launch tests against 'hardened' addresses, using ' (apostrophe
 Using page https://iancoleman.io/bip39/ you may easily check what to expect for the given seed.
 By default program uses P2PKH script semantics for addresses like "1..." and P2WPKH for addresses like "bc1...".
 
-If derivation path is not specified, by default program is using "m/0/0" (BIP32 for P2PKH and BIP141 for P2WPKH). If you want to do calculations for BIP44 or BIP84, please use the proper derivation path, for example "m/44'/0'/0'/0/0" or "m/84'/0'/0'/0/0". 
+If derivation path is not specified, by default program is using "m/0/0" (BIP32 for P2PKH and BIP141 for P2WPKH). If you want to do calculations for BIP44 or BIP84, please use the proper derivation path, for example "m/44'/0'/0'/0/0" or "m/84'/0'/0'/0/0", where the last two digits are the most important (account & number of address).
 
 Program could be launched in 2 modes:
 <ol>
