@@ -4,5 +4,7 @@ java -jar lostWord.jar input.conf
 Available solvers:
 ONE_UNKNOWN - seed with one unknown word, on unknown position
 KNOWN_POSITION - seed with one or more unknown word, on known position
+POOL - seed with one or more unknown word, on known position, with a candidates
+ONE_UNKNOWN_CHECK_ALL - online check for balance of 10 addresses for each generated seed (with one missing word)
 For details, please check the corresponding example files.
 

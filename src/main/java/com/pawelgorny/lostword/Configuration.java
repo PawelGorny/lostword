@@ -94,27 +94,24 @@ public final class Configuration {
         }
         String[] dpath = path.replaceAll("'", "").split("/");
         try {
-            Integer.parseInt(dpath[1]);
-            Integer.parseInt(dpath[2]);
-            DPaccount = Integer.parseInt(dpath[1]);
-            DPaddress = Integer.parseInt(dpath[2]);
+            Integer.parseInt(dpath[dpath.length-2]);
+            Integer.parseInt(dpath[dpath.length-1]);
+            DPaccount = Integer.parseInt(dpath[dpath.length-2]);
+            DPaddress = Integer.parseInt(dpath[dpath.length-1]);
             DPhard = path.endsWith("'");
-            if (DBscriptType.equals(Script.ScriptType.P2PKH)){
-                derivationPath = new ArrayList<>(2);
-            }else if (DBscriptType.equals(Script.ScriptType.P2WPKH)){
-                derivationPath = new ArrayList<>(5);
-                derivationPath.add(new ChildNumber(84, true));
-                derivationPath.add(new ChildNumber(0, true));
-                derivationPath.add(new ChildNumber(0, true));
+            derivationPath = new ArrayList<>(5);
+            boolean pathProvided = dpath.length>3;
+            if (pathProvided){
+                for (int i=1; i<dpath.length-2; i++){
+                    String x = dpath[i].replaceAll("'","");
+                    derivationPath.add(new ChildNumber(Integer.parseInt(x), true));
+                }
             }
             derivationPath.add(new ChildNumber(getDPaccount(), false));
             derivationPath.add(new ChildNumber(getDPaddress(), isDPhard()));
-
             String derivationPathString = "m/"+derivationPath.stream().map(Object::toString)
                     .collect(Collectors.joining("/")).replaceAll("H", "'");
-
             System.out.println("Using derivation path " + derivationPathString);
-
         } catch (Exception e) {
             parsePath(this.DEFAULT_PATH);
         }

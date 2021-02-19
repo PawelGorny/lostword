@@ -1,6 +1,6 @@
 # LostWord
 Tool for finding missing word for BIP39 seed, having (n-1) known ordered words.
-Program works with BIP84/P2WPKH or BIP32/P2PKH Derivation Path.
+Program works with P2WPKH: BIP84, BIP141 or P2PKH: BIP32, BIP44 Derivation Path.
 
 Usage:
 `java -jar lostWord.jar configurationFile`
@@ -11,10 +11,12 @@ How to use it
 -------------
 Please check files in /examples/ folder to see how to set up the configuration file.
 Configuration file expects: address, number of words, known words and additionally derivation path. If not specified, the default will be used (m/0/0).
-This version checks only one address - for the given path. In the future (or if requested) I will add possibility to verify all the addresses up to address number x. Today, if you know address but you do not know if it was first or second from the derivation path, you must launch program twice, using two different paths (m/0/0 and m/0/1).
+This version checks only one address - for the given path. In the future (or if requested) I will add possibility to verify all the addresses up to address number x. If you know the address but you do not know if it was first or second from the derivation path, you must launch program twice, using two different paths (for example m/0/0 and m/0/1).
 It is possible to launch tests against 'hardened' addresses, using ' (apostrophe) as the last character of path.
 Using page https://iancoleman.io/bip39/ you may easily check what to expect for the given seed.
 By default program uses P2PKH script semantics for addresses like "1..." and P2WPKH for addresses like "bc1...".
+
+If derivation path is not specified, by default program is using "m/0/0" (BIP32 for P2PKH and BIP141 for P2WPKH). If you want to do calculations for BIP44 or BIP84, please use the proper derivation path, for example "m/44'/0'/0'/0/0" or "m/84'/0'/0'/0/0". 
 
 Program could be launched in 2 modes:
 <ol>

@@ -83,7 +83,7 @@ public class Main {
                                 path = line;
                             } else if (words.size() < size - 1) {
                                 if (!Configuration.MNEMONIC_CODE.getWordList().contains(line)) {
-                                    System.out.println("WORD not in BIP39: " + line);
+                                    System.out.println("WORD not in BIP39 dictionary: " + line);
                                     System.exit(1);
                                 }
                                 words.add(line);
