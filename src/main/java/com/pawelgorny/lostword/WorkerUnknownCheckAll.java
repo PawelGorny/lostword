@@ -85,11 +85,13 @@ public class WorkerUnknownCheckAll extends Worker{
         }
         byte[] seed = PBKDF2SHA512.derive(Utils.SPACE_JOINER.join(mnemonic).getBytes(StandardCharsets.UTF_8), SALT, 2048, 64);
         DeterministicKey deterministicKey = createMasterPrivateKey(seed, SHA512DIGEST == null ? this.SHA_512_DIGEST : SHA512DIGEST);
-        DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, configuration.getDPchild0());
+        for (int i=0; i<configuration.getDerivationPath().size()-1; i++){
+            deterministicKey = HDKeyDerivation.deriveChildKey(deterministicKey, configuration.getDerivationPath().get(i));
+        }
         int ADDRESSES_TO_CHECK = 10;
         List<String> addresses = new ArrayList<>(ADDRESSES_TO_CHECK);
         for (int a=0; a<ADDRESSES_TO_CHECK; a++){
-            DeterministicKey newAddress = HDKeyDerivation.deriveChildKey(receiving, new ChildNumber(a, configuration.isDPhard()));
+            DeterministicKey newAddress = HDKeyDerivation.deriveChildKey(deterministicKey, new ChildNumber(a, configuration.isDPhard()));
             addresses.add(Address.fromKey(configuration.getNETWORK_PARAMETERS(), newAddress, configuration.getDBscriptType()).toString());
         }
         System.out.print("Checking balance of [" + Utils.SPACE_JOINER.join(mnemonic) + "] ");

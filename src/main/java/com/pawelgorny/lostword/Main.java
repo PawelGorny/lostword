@@ -93,13 +93,13 @@ public class Main {
                                 path = line;
                             }else if (words.size() < size) {
                                 if (!line.startsWith(Configuration.UNKNOWN_CHAR) && !Configuration.MNEMONIC_CODE.getWordList().contains(line)) {
-                                    System.out.println("WORD not in BIP39: " + line);
+                                    System.out.println("WORD not in BIP39 dictionary: " + line);
                                     System.exit(1);
                                 }
                                 if (line.startsWith(Configuration.UNKNOWN_CHAR)){
                                     if (!Configuration.UNKNOWN_CHAR.equals(line)){
                                         if (!Configuration.MNEMONIC_CODE.getWordList().contains(line.substring(1).trim())){
-                                            System.out.println("WORD not in BIP39: " + line);
+                                            System.out.println("WORD not in BIP39 dictionary: " + line);
                                             System.exit(1);
                                         }
                                         knownStarter = Configuration.MNEMONIC_CODE.getWordList().indexOf(line.substring(1).trim());
@@ -116,7 +116,7 @@ public class Main {
                                 String[] potentialWords = line.split(" ");
                                 for (int i=0; i<potentialWords.length; i++){
                                     if (!Configuration.MNEMONIC_CODE.getWordList().contains(potentialWords[i])){
-                                        System.out.println("WORD not in BIP39: " + potentialWords[i]);
+                                        System.out.println("WORD not in BIP39 dictionary: " + potentialWords[i]);
                                         System.exit(1);
                                     }
                                 }

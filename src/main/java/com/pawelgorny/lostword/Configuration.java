@@ -8,7 +8,9 @@ import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.script.Script;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class Configuration {
     final static String COMMENT_CHAR = "#";
@@ -16,8 +18,6 @@ public final class Configuration {
     final static MnemonicCode MNEMONIC_CODE = getMnemonicCode();
     private final NetworkParameters NETWORK_PARAMETERS = MainNetParams.get();
     private final String DEFAULT_PATH = "m/0/0";
-    private final ChildNumber DPchild0;
-    private final ChildNumber DPchild1;
     private String targetAddress;
     private int SIZE;
     private List<String> WORDS;
@@ -27,6 +27,8 @@ public final class Configuration {
     private boolean DPhard = false;
     private Script.ScriptType DBscriptType = Script.ScriptType.P2PKH;
     private int knownStart = 0;
+
+    private List<ChildNumber> derivationPath;
 
     private LegacyAddress legacyAddress;
     private SegwitAddress segwitAddress;
@@ -40,11 +42,8 @@ public final class Configuration {
         if (WORK.ONE_UNKNOWN.equals(work) || WORK.ONE_UNKNOWN_CHECK_ALL.equals(work)){
             this.SIZE++;
         }
-        parsePath(path);
         parseScript(targetAddress);
-
-        DPchild0 = new ChildNumber(getDPaccount(), false);
-        DPchild1 = new ChildNumber(getDPaddress(), isDPhard());
+        parsePath(path);
         this.knownStart = knownStarter;
     }
 
@@ -100,7 +99,22 @@ public final class Configuration {
             DPaccount = Integer.parseInt(dpath[1]);
             DPaddress = Integer.parseInt(dpath[2]);
             DPhard = path.endsWith("'");
-            System.out.println("Using derivation path " + path);
+            if (DBscriptType.equals(Script.ScriptType.P2PKH)){
+                derivationPath = new ArrayList<>(2);
+            }else if (DBscriptType.equals(Script.ScriptType.P2WPKH)){
+                derivationPath = new ArrayList<>(5);
+                derivationPath.add(new ChildNumber(84, true));
+                derivationPath.add(new ChildNumber(0, true));
+                derivationPath.add(new ChildNumber(0, true));
+            }
+            derivationPath.add(new ChildNumber(getDPaccount(), false));
+            derivationPath.add(new ChildNumber(getDPaddress(), isDPhard()));
+
+            String derivationPathString = "m/"+derivationPath.stream().map(Object::toString)
+                    .collect(Collectors.joining("/")).replaceAll("H", "'");
+
+            System.out.println("Using derivation path " + derivationPathString);
+
         } catch (Exception e) {
             parsePath(this.DEFAULT_PATH);
         }
@@ -138,14 +152,6 @@ public final class Configuration {
         return DBscriptType;
     }
 
-    public ChildNumber getDPchild0() {
-        return DPchild0;
-    }
-
-    public ChildNumber getDPchild1() {
-        return DPchild1;
-    }
-
     public WORK getWork() {
         return work;
     }
@@ -172,6 +178,10 @@ public final class Configuration {
 
     public List<List<String>> getWORDS_POOL() {
         return WORDS_POOL;
+    }
+
+    public List<ChildNumber> getDerivationPath() {
+        return derivationPath;
     }
 
     public void setWORDS_POOL(List<List<String>> WORDS_POOL) {

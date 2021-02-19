@@ -3,7 +3,10 @@ package com.pawelgorny.lostword;
 import com.pawelgorny.lostword.util.PBKDF2SHA512;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Utils;
-import org.bitcoinj.crypto.*;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.HDDerivationException;
+import org.bitcoinj.crypto.HDKeyDerivation;
+import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.script.Script;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.macs.HMac;
@@ -84,17 +87,13 @@ public class Worker {
         }
         byte[] seed = PBKDF2SHA512.derive(Utils.SPACE_JOINER.join(mnemonic).getBytes(StandardCharsets.UTF_8), SALT, 2048, 64);
         DeterministicKey deterministicKey = createMasterPrivateKey(seed, SHA512DIGEST==null?this.SHA_512_DIGEST:SHA512DIGEST);
+        for (int i=0; i<configuration.getDerivationPath().size(); i++){
+            deterministicKey = HDKeyDerivation.deriveChildKey(deterministicKey, configuration.getDerivationPath().get(i));
+        }
         if (configuration.getDBscriptType().equals(Script.ScriptType.P2WPKH)){
-            DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, new ChildNumber(84, true));
-            DeterministicKey new_address_key = HDKeyDerivation.deriveChildKey(receiving, new ChildNumber(0, true));
-            DeterministicKey new_address_key2 = HDKeyDerivation.deriveChildKey(new_address_key, new ChildNumber(0, true));
-            DeterministicKey new_address_key3 = HDKeyDerivation.deriveChildKey(new_address_key2, configuration.getDPchild0());
-            DeterministicKey new_address_key4 = HDKeyDerivation.deriveChildKey(new_address_key3, configuration.getDPchild1());
-            return Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key4, Script.ScriptType.P2WPKH).equals(configuration.getSegwitAddress());
+            return Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, Script.ScriptType.P2WPKH).equals(configuration.getSegwitAddress());
         }else {
-            DeterministicKey receiving = HDKeyDerivation.deriveChildKey(deterministicKey, configuration.getDPchild0());
-            DeterministicKey new_address_key = HDKeyDerivation.deriveChildKey(receiving, configuration.getDPchild1());
-            return Address.fromKey(configuration.getNETWORK_PARAMETERS(), new_address_key, configuration.getDBscriptType()).equals(configuration.getLegacyAddress());
+            return Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, configuration.getDBscriptType()).equals(configuration.getLegacyAddress());
         }
     }
 
