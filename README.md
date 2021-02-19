@@ -63,6 +63,7 @@ It is possible to resume search from the specific word on the first unknown posi
 Suitable for seeds where we know the number of words, we know order of words, but we do not know one word.
 Program checks seeds testing a 'lost' word on each position.
 This worker generates 10 addresses for the created seed and checks the balance online (using blockchain.info API).
+Currently it works only with P2PKH
 
     ONE_UNKNOWN_CHECK_ALL
     anyAddress
@@ -102,5 +103,5 @@ TODO
 ----
 <ol>
 <li>checking several addresses for the path (up to address number X)</li>
-<li>add support for BIP44, BIP49, BIP84, BIP141</li>
+<li>add support for other derivation paths</li>
 </ol>
