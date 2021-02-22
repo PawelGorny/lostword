@@ -23,7 +23,8 @@ public final class Configuration {
     private List<String> WORDS;
     private List<List<String>> WORDS_POOL;
     private int DPaccount = 0;
-    private int DPaddress = 0;
+    private int DPaddress = -1;
+    private int DPaddressMax = -1;
     private boolean DPhard = false;
     private Script.ScriptType DBscriptType = Script.ScriptType.P2PKH;
     private int knownStart = 0;
@@ -95,9 +96,25 @@ public final class Configuration {
         String[] dpath = path.replaceAll("'", "").split("/");
         try {
             Integer.parseInt(dpath[dpath.length-2]);
-            Integer.parseInt(dpath[dpath.length-1]);
             DPaccount = Integer.parseInt(dpath[dpath.length-2]);
-            DPaddress = Integer.parseInt(dpath[dpath.length-1]);
+            try {
+                Integer.parseInt(dpath[dpath.length - 1]);
+            }catch (Exception e){
+                if (dpath[dpath.length - 1].contains("-")){
+                    String[] dpatchAddress = dpath[dpath.length - 1].replaceAll(" ","").split("-");
+                    if (dpatchAddress.length!=2){
+                        parsePath(this.DEFAULT_PATH);
+                    }
+                    Integer.parseInt(dpatchAddress[0]);
+                    Integer.parseInt(dpatchAddress[1]);
+                    DPaddress = Integer.parseInt(dpatchAddress[0]);
+                    DPaddressMax =  Integer.parseInt(dpatchAddress[1]);
+                }
+            }
+            if (getDPaddress()==-1) {
+                DPaddress = Integer.parseInt(dpath[dpath.length - 1]);
+                DPaddressMax = DPaddress;
+            }
             DPhard = path.endsWith("'");
             derivationPath = new ArrayList<>(5);
             boolean pathProvided = dpath.length>3;
@@ -139,6 +156,10 @@ public final class Configuration {
 
     public int getDPaddress() {
         return DPaddress;
+    }
+
+    public int getDPaddressMax() {
+        return DPaddressMax;
     }
 
     public boolean isDPhard() {

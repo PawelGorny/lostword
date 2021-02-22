@@ -92,8 +92,21 @@ Configuration file example (seed with 6 words, one word unknown, known possible 
     pitch
     hill
 
-
 </ol>
+
+It is possible to specify the derivation path as a range. For example "m/0/0-4" if you want to launch search on the first five addresses or "m/0/1-2'" if you want to search second and third hardened addresses. 
+Example of search with a range:
+
+    ONE_UNKNOWN
+    bc1qg3m687gpwljqnzja233sf99aex79cmwr5ewhxh
+    6
+    brother
+    canal
+    remove
+    pitch
+    hill
+    m/0/2-7'
+
 
 Contact
 -------

@@ -3,10 +3,7 @@ package com.pawelgorny.lostword;
 import com.pawelgorny.lostword.util.PBKDF2SHA512;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Utils;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDDerivationException;
-import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.crypto.MnemonicException;
+import org.bitcoinj.crypto.*;
 import org.bitcoinj.script.Script;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.macs.HMac;
@@ -86,15 +83,43 @@ public class Worker {
             return false;
         }
         byte[] seed = PBKDF2SHA512.derive(Utils.SPACE_JOINER.join(mnemonic).getBytes(StandardCharsets.UTF_8), SALT, 2048, 64);
-        DeterministicKey deterministicKey = createMasterPrivateKey(seed, SHA512DIGEST==null?this.SHA_512_DIGEST:SHA512DIGEST);
-        for (int i=0; i<configuration.getDerivationPath().size(); i++){
-            deterministicKey = HDKeyDerivation.deriveChildKey(deterministicKey, configuration.getDerivationPath().get(i));
+        boolean result;
+        int addressToWork = configuration.getDPaddress();
+        int sizeM1=configuration.getDerivationPath().size()-1;
+        while (addressToWork<=configuration.getDPaddressMax()){
+            DeterministicKey deterministicKey = createMasterPrivateKey(seed, SHA512DIGEST==null?this.SHA_512_DIGEST:SHA512DIGEST);
+            for (int i=0; i<configuration.getDerivationPath().size(); i++){
+                if (sizeM1==i) {
+                    if (addressToWork==configuration.getDPaddress()) {
+                        deterministicKey = HDKeyDerivation.deriveChildKey(deterministicKey, configuration.getDerivationPath().get(i));
+                    }else{
+                        deterministicKey = HDKeyDerivation.deriveChildKey(deterministicKey, new ChildNumber(addressToWork, configuration.isDPhard()));
+                    }
+                }else{
+                    deterministicKey = HDKeyDerivation.deriveChildKey(deterministicKey, configuration.getDerivationPath().get(i));
+                }
+            }
+            if (configuration.getDBscriptType().equals(Script.ScriptType.P2WPKH)){
+                result = Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, Script.ScriptType.P2WPKH).equals(configuration.getSegwitAddress());
+            }else {
+                result = Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, configuration.getDBscriptType()).equals(configuration.getLegacyAddress());
+            }
+            if (result){
+                displayRealDerivationPath(addressToWork);
+                return true;
+            }
+            addressToWork++;
         }
-        if (configuration.getDBscriptType().equals(Script.ScriptType.P2WPKH)){
-            return Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, Script.ScriptType.P2WPKH).equals(configuration.getSegwitAddress());
-        }else {
-            return Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, configuration.getDBscriptType()).equals(configuration.getLegacyAddress());
+        return false;
+    }
+
+    private void displayRealDerivationPath(int a){
+        String dp = "m/";
+        for (int i=0; i<configuration.getDerivationPath().size()-1; i++){
+            dp+=configuration.getDerivationPath().get(i).toString().replace('H','\'')+"/";
         }
+        dp+=a+(configuration.isDPhard()?"'":"");
+        System.out.println("Found address on the derivation path "+dp);
     }
 
     protected boolean checksumCheck(final List<String> mnemonic, MessageDigest sha256){
