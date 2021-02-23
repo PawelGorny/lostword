@@ -59,8 +59,16 @@ public class Worker {
             case POOL:
                 worker = new WorkerPool(configuration);
                 break;
+            case PERMUTATION:
+                worker = new WorkerPermutation(configuration);
+                break;
         }
         System.out.println("--- Starting worker --- "+SDF.format(new Date())+" ---");
+        if (WORK.PERMUTATION.equals(configuration.getWork())){
+            worker.run();
+            System.out.println();
+            return;
+        }
         System.out.println("Expected address: '" + configuration.getTargetAddress() + "'");
         System.out.println("Using " + THREADS + " threads");
         worker.run();

@@ -75,7 +75,7 @@ public final class Configuration {
                 DBscriptType = Script.ScriptType.P2WPKH;
             }
         }
-        if (!WORK.ONE_UNKNOWN_CHECK_ALL.equals(work)){
+        if (!WORK.ONE_UNKNOWN_CHECK_ALL.equals(work) && !WORK.PERMUTATION.equals(work)){
             switch (getDBscriptType()){
                 case P2PKH:
                     legacyAddress = LegacyAddress.fromBase58(getNETWORK_PARAMETERS(), getTargetAddress());

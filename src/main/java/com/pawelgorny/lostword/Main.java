@@ -88,7 +88,7 @@ public class Main {
                                 }
                                 words.add(line);
                             }
-                        }else if (WORK.KNOWN_POSITION.equals(work)){
+                        }else if (WORK.KNOWN_POSITION.equals(work) || WORK.PERMUTATION.equals(work)){
                             if (words.size() == size) {
                                 path = line;
                             }else if (words.size() < size) {

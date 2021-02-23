@@ -77,6 +77,20 @@ Currently it works only with P2PKH
     hill
     m/0/0'
 
+<li>PERMUTATION</li>
+Worker displays and writes to file all the possible (correct) seeds from the given list of words.
+Configuration file example (seed with 6 words):
+
+    PERMUTATION
+    PERMUTATION
+    6
+    brother
+    canal
+    medal
+    remove
+    pitch
+    hill
+
 <li>POOL</li>
 Suitable for seeds where we know the number of words, we know order of words and we know potential candidates on each position.
 Still '?' could be used for the whole dictionary.
