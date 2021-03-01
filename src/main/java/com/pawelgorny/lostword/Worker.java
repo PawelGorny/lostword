@@ -25,6 +25,7 @@ public class Worker {
     protected final Configuration configuration;
     protected int THREADS = 2;
     protected final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    protected static final int STATUS_PERIOD = 1000 * 60;
 
     protected final HMac SHA_512_DIGEST;
     protected static final byte[] SALT = "mnemonic".getBytes(StandardCharsets.UTF_8);
@@ -59,6 +60,9 @@ public class Worker {
             case POOL:
                 worker = new WorkerPool(configuration);
                 break;
+            case PERMUTATION_CHECK:
+                worker = new WorkerPermutationCheck(configuration);
+                break;
             case PERMUTATION:
                 worker = new WorkerPermutation(configuration);
                 break;
@@ -75,9 +79,9 @@ public class Worker {
         System.out.println("");
         System.out.println("--- Work finished ---");
         if (RESULT == null) {
-            System.out.println("Missing word not found!");
+            System.out.println("Result not found!");
         } else {
-            System.out.println("Found missing word!");
+            System.out.println("Found result!");
             System.out.println(RESULT.toString());
         }
     }

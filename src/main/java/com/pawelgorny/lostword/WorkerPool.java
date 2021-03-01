@@ -15,7 +15,6 @@ public class WorkerPool extends Worker {
 
     private static int NUMBER_UNKNOWN;
     private long start = 0;
-    private static final int STATUS_PERIOD = 1000 * 60;
 
     public WorkerPool(Configuration configuration) {
         super(configuration);

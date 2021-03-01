@@ -63,7 +63,7 @@ public class WorkerPermutation extends Worker{
         }
     }
     private void printArray(String[] input) {
-        List mnemonic = Arrays.asList(input);
+        List<String> mnemonic = Arrays.asList(input);
         if (checksumCheck(mnemonic, SHA_256_DIGEST)) {
             String data = Utils.SPACE_JOINER.join(mnemonic);
             System.out.println(data);

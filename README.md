@@ -77,12 +77,28 @@ Currently it works only with P2PKH
     hill
     m/0/0'
 
+<li>PERMUTATION_CHECK</li>
+Worker creates all the possible (correct) seeds from the given list of words and checks them using given address and derivation path.
+Configuration file example (seed with 6 words):
+
+    PERMUTATION_CHECK
+    1NzWRF78WKHGCNvSjvRB5cU9WzjpYF1RMb
+    6
+    hill
+    canal
+    brother
+    medal
+    pitch
+    remove
+    m/1/4
+
+
 <li>PERMUTATION</li>
 Worker displays and writes to file all the possible (correct) seeds from the given list of words.
 Configuration file example (seed with 6 words):
 
     PERMUTATION
-    PERMUTATION
+    anyAddress
     6
     brother
     canal
