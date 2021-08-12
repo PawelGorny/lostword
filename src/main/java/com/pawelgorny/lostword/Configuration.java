@@ -98,7 +98,7 @@ public final class Configuration {
                 }
             }
         }
-        if (this.coin.equals(Configuration.ETHEREUM)){
+        if (Configuration.ETHEREUM.equals(this.coin)){
             System.out.println("Using ETHEREUM");
         }else {
             System.out.println("Using script " + DBscriptType);
