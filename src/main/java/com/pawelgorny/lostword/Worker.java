@@ -5,9 +5,12 @@ import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.*;
 import org.bitcoinj.script.Script;
+import org.bitcoinj.wallet.DeterministicKeyChain;
+import org.bitcoinj.wallet.DeterministicSeed;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.web3j.crypto.Keys;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -94,6 +97,11 @@ public class Worker {
         if (!checksumCheck(mnemonic, sha256)){
             return false;
         }
+
+        if (Configuration.ETHEREUM.equals(configuration.getCoin())){
+            return checkEthereum(mnemonic);
+        }
+
         byte[] seed = PBKDF2SHA512.derive(Utils.SPACE_JOINER.join(mnemonic).getBytes(StandardCharsets.UTF_8), SALT, 2048, 64);
         boolean result;
         int addressToWork = configuration.getDPaddress();
@@ -123,6 +131,14 @@ public class Worker {
             addressToWork++;
         }
         return false;
+    }
+
+    protected boolean checkEthereum(final List<String> mnemonic) throws MnemonicException {
+        DeterministicSeed seed = new DeterministicSeed(mnemonic, null, "", System.currentTimeMillis());
+        DeterministicKeyChain chain = DeterministicKeyChain.builder().seed(seed).build();
+        DeterministicKey key = chain.getKeyByPath(configuration.getKeyPath(), true);
+        String address = Keys.getAddress(key.decompress().getPublicKeyAsHex().substring(2));
+        return configuration.getEthereumAddress().equals(address);
     }
 
     private void displayRealDerivationPath(int a){

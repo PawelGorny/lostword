@@ -18,6 +18,8 @@ By default program uses P2PKH script semantics for addresses like "1..." and P2W
 
 If derivation path is not specified, by default program is using "m/0/0" (BIP32 for P2PKH and BIP141 for P2WPKH). If you want to do calculations for BIP44 or BIP84, please use the proper derivation path, for example "m/44'/0'/0'/0/0" or "m/84'/0'/0'/0/0", where the last two digits are the most important (account & number of address).
 
+Program supports also Ethereum (path m/44'/60'/0'/0/0)
+
 Program could be launched in 2 modes:
 <ol>
 <li>ONE_UNKNOWN</li>
@@ -124,6 +126,7 @@ Configuration file example (seed with 6 words, one word unknown, known possible 
 
 </ol>
 
+For BTC only (not ETH): 
 It is possible to specify the derivation path as a range. For example "m/0/0-4" if you want to launch search on the first five addresses or "m/0/1-2'" if you want to check  second and third hardened addresses. 
 Example of search with a range:
 

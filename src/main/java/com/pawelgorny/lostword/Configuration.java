@@ -4,6 +4,7 @@ import org.bitcoinj.core.LegacyAddress;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.SegwitAddress;
 import org.bitcoinj.crypto.ChildNumber;
+import org.bitcoinj.crypto.HDUtils;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.script.Script;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 public final class Configuration {
     final static String COMMENT_CHAR = "#";
     public final static String UNKNOWN_CHAR = "?";
+    public final static Integer ETHEREUM = 60;
     final static MnemonicCode MNEMONIC_CODE = getMnemonicCode();
     private final NetworkParameters NETWORK_PARAMETERS = MainNetParams.get();
     private final String DEFAULT_PATH = "m/0/0";
@@ -30,9 +32,13 @@ public final class Configuration {
     private int knownStart = 0;
 
     private List<ChildNumber> derivationPath;
+    private String derivationPathFull;
+    private Integer coin;
+    private List<ChildNumber> keyPath;
 
     private LegacyAddress legacyAddress;
     private SegwitAddress segwitAddress;
+    private String ethereumAddress;
 
     private final WORK work;
 
@@ -74,15 +80,22 @@ public final class Configuration {
             if (this.targetAddress.startsWith("bc1")) {
                 DBscriptType = Script.ScriptType.P2WPKH;
             }
+            if (this.targetAddress.startsWith("0x")){
+                this.targetAddress = this.targetAddress.substring(2);
+                this.ethereumAddress = getTargetAddress().toLowerCase();
+                this.coin = Configuration.ETHEREUM;
+            }
         }
         if (!WORK.ONE_UNKNOWN_CHECK_ALL.equals(work) && !WORK.PERMUTATION.equals(work)){
-            switch (getDBscriptType()){
-                case P2PKH:
-                    legacyAddress = LegacyAddress.fromBase58(getNETWORK_PARAMETERS(), getTargetAddress());
-                    break;
-                case P2WPKH:
-                    segwitAddress = SegwitAddress.fromBech32(getNETWORK_PARAMETERS(), getTargetAddress());
-                    break;
+            if (this.ethereumAddress==null){
+                switch (getDBscriptType()){
+                    case P2PKH:
+                        legacyAddress = LegacyAddress.fromBase58(getNETWORK_PARAMETERS(), getTargetAddress());
+                        break;
+                    case P2WPKH:
+                        segwitAddress = SegwitAddress.fromBech32(getNETWORK_PARAMETERS(), getTargetAddress());
+                        break;
+                }
             }
         }
         System.out.println("Using script " + DBscriptType);
@@ -93,6 +106,7 @@ public final class Configuration {
             parsePath(this.DEFAULT_PATH);
             return;
         }
+        derivationPathFull = path.replaceAll("'", "H").toUpperCase();
         String[] dpath = path.replaceAll("'", "").split("/");
         try {
             Integer.parseInt(dpath[dpath.length-2]);
@@ -122,6 +136,10 @@ public final class Configuration {
                 for (int i=1; i<dpath.length-2; i++){
                     String x = dpath[i].replaceAll("'","");
                     derivationPath.add(new ChildNumber(Integer.parseInt(x), true));
+                    if (i==2){
+                        this.coin = Integer.parseInt(x);
+                        this.keyPath = HDUtils.parsePath(this.derivationPathFull);
+                    }
                 }
             }
             derivationPath.add(new ChildNumber(getDPaccount(), false));
@@ -205,5 +223,17 @@ public final class Configuration {
     public void setWORDS_POOL(List<List<String>> WORDS_POOL) {
         this.WORDS_POOL = WORDS_POOL;
         this.SIZE = WORDS_POOL.size();
+    }
+
+    public Integer getCoin() {
+        return coin;
+    }
+
+    public List<ChildNumber> getKeyPath() {
+        return keyPath;
+    }
+
+    public String getEthereumAddress() {
+        return ethereumAddress;
     }
 }
