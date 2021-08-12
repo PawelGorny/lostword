@@ -109,24 +109,27 @@ public class Main {
                                 words.add(line);
                             }
                         }else if (WORK.POOL.equals(work)){
-                            if (line.startsWith(Configuration.UNKNOWN_CHAR)){
-                                words.add(Configuration.UNKNOWN_CHAR);
-                                wordsPool.add(new ArrayList<>(Configuration.MNEMONIC_CODE.getWordList()));
-                            }else {
-                                String[] potentialWords = line.split(" ");
-                                for (int i=0; i<potentialWords.length; i++){
-                                    if (!Configuration.MNEMONIC_CODE.getWordList().contains(potentialWords[i])){
-                                        System.out.println("WORD not in BIP39 dictionary: " + potentialWords[i]);
-                                        System.exit(1);
+                            if (words.size() == size) {
+                                path = line;
+                            }else
+                                if (line.startsWith(Configuration.UNKNOWN_CHAR)){
+                                    words.add(Configuration.UNKNOWN_CHAR);
+                                    wordsPool.add(new ArrayList<>(Configuration.MNEMONIC_CODE.getWordList()));
+                                }else {
+                                    String[] potentialWords = line.split(" ");
+                                    for (int i=0; i<potentialWords.length; i++){
+                                        if (!Configuration.MNEMONIC_CODE.getWordList().contains(potentialWords[i])){
+                                            System.out.println("WORD not in BIP39 dictionary: " + potentialWords[i]);
+                                            System.exit(1);
+                                        }
+                                    }
+                                    wordsPool.add(Arrays.asList(potentialWords));
+                                    if (potentialWords.length==1){
+                                        words.add(potentialWords[0]);
+                                    }else {
+                                        words.add(Configuration.UNKNOWN_CHAR);
                                     }
                                 }
-                                wordsPool.add(Arrays.asList(potentialWords));
-                                if (potentialWords.length==1){
-                                    words.add(potentialWords[0]);
-                                }else {
-                                    words.add(Configuration.UNKNOWN_CHAR);
-                                }
-                            }
                         }
                         break;
                 }
