@@ -37,7 +37,9 @@ public final class Configuration {
     private List<ChildNumber> keyPath;
 
     private LegacyAddress legacyAddress;
+    private byte[] legacyAddressHash;
     private SegwitAddress segwitAddress;
+    private byte[] segwitAddressHash;
     private String ethereumAddress;
 
     private final WORK work;
@@ -91,9 +93,11 @@ public final class Configuration {
                 switch (getDBscriptType()){
                     case P2PKH:
                         legacyAddress = LegacyAddress.fromBase58(getNETWORK_PARAMETERS(), getTargetAddress());
+                        legacyAddressHash = legacyAddress.getHash();
                         break;
                     case P2WPKH:
                         segwitAddress = SegwitAddress.fromBech32(getNETWORK_PARAMETERS(), getTargetAddress());
+                        segwitAddressHash = segwitAddress.getHash();
                         break;
                 }
             }
@@ -142,7 +146,7 @@ public final class Configuration {
                     derivationPath.add(new ChildNumber(Integer.parseInt(x), true));
                     if (i==2){
                         this.coin = Integer.parseInt(x);
-                        this.keyPath = HDUtils.parsePath(this.derivationPathFull);
+                        this.keyPath = HDUtils.parsePath(this.derivationPathFull.contains("-")?this.derivationPathFull.substring(0, this.derivationPathFull.indexOf("-")):this.derivationPathFull);
                     }
                 }
             }
@@ -208,8 +212,16 @@ public final class Configuration {
         this.legacyAddress = legacyAddress;
     }
 
+    public byte[] getLegacyAddressHash() {
+        return legacyAddressHash;
+    }
+
     public SegwitAddress getSegwitAddress() {
         return segwitAddress;
+    }
+
+    public byte[] getSegwitAddressHash() {
+        return segwitAddressHash;
     }
 
     public void setSegwitAddress(SegwitAddress segwitAddress) {

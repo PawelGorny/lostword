@@ -120,7 +120,8 @@ public class Worker {
                 }
             }
             if (configuration.getDBscriptType().equals(Script.ScriptType.P2WPKH)){
-                result = Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, Script.ScriptType.P2WPKH).equals(configuration.getSegwitAddress());
+//                result = Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, Script.ScriptType.P2WPKH).equals(configuration.getSegwitAddress());
+                result = Arrays.equals(configuration.getSegwitAddressHash(), deterministicKey.getPubKeyHash());
             }else {
                 result = Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, configuration.getDBscriptType()).equals(configuration.getLegacyAddress());
             }
