@@ -12,6 +12,8 @@ import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.web3j.crypto.Keys;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -27,7 +29,8 @@ public class Worker {
     protected static Result RESULT = null;
     protected final Configuration configuration;
     protected int THREADS = 2;
-    protected final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    protected final SimpleDateFormat SDTF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    protected final SimpleDateFormat SDTCF = new SimpleDateFormat("yyyyMMdd_HHmmss");
     protected static final int STATUS_PERIOD = 1000 * 60;
 
     protected final HMac SHA_512_DIGEST;
@@ -36,8 +39,11 @@ public class Worker {
     private final byte[] BITCOIN_SEED_BYTES = "Bitcoin seed".getBytes();
     private final long CREATION_SECONDS = Utils.currentTimeSeconds();
 
+    private final int CONCAT_LEN_BITS;
+
     public Worker(Configuration configuration)  {
         this.configuration = configuration;
+        this.CONCAT_LEN_BITS = 11 * configuration.getSIZE();
         int procs = Runtime.getRuntime().availableProcessors();
         if (procs > 1) {
             if (procs % 2 == 1) {
@@ -70,7 +76,7 @@ public class Worker {
                 worker = new WorkerPermutation(configuration);
                 break;
         }
-        System.out.println("--- Starting worker --- "+SDF.format(new Date())+" ---");
+        System.out.println("--- Starting worker --- "+ SDTF.format(new Date())+" ---");
         if (WORK.PERMUTATION.equals(configuration.getWork())){
             worker.run();
             System.out.println();
@@ -84,8 +90,26 @@ public class Worker {
         if (RESULT == null) {
             System.out.println("Result not found!");
         } else {
-            System.out.println("Found result!");
+            System.out.println("Result found!");
             System.out.println(RESULT.toString());
+            resultToFile();
+        }
+    }
+
+    private void resultToFile() {
+        try {
+            FileWriter fileWriter = new FileWriter(this.configuration.getWork().name() + "_result_" + SDTCF.format(new Date()) + ".txt", false);
+            fileWriter.write(RESULT.toStringFile());
+            if (!configuration.getTargetAddress().isEmpty()){
+                fileWriter.write("\r\n");
+                fileWriter.write(configuration.getTargetAddress());
+                fileWriter.write("\r\n");
+                fileWriter.write(configuration.getDerivationPathFull());
+            }
+            fileWriter.write("\r\n");
+            fileWriter.close();
+        } catch (IOException e) {
+            System.out.println("Cannot write to file: " + e.getLocalizedMessage());
         }
     }
 
@@ -163,8 +187,7 @@ public class Worker {
     }
 
     public boolean checksumCheckBcJ(List<String> words, MessageDigest sha256){
-        int concatLenBits = words.size() * 11;
-        boolean[] concatBits = new boolean[concatLenBits];
+        boolean[] concatBits = new boolean[CONCAT_LEN_BITS];
         int wordindex = 0;
 
         int hash;
@@ -179,8 +202,8 @@ public class Worker {
             }
         }
 
-        int var11 = concatLenBits / 33;
-        int var12 = concatLenBits - var11;
+        int var11 = CONCAT_LEN_BITS / 33;
+        int var12 = CONCAT_LEN_BITS - var11;
         byte[] var13 = new byte[var12 / 8];
 
         for(hash = 0; hash < var13.length; ++hash) {
@@ -287,7 +310,7 @@ public class Worker {
                     for (int bipPosition = 0; RESULT == null && bipPosition < WORDS_TO_WORK.size(); bipPosition++) {
                         SEED.set(WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
                         if (check(SEED, LOCAL_SHA_512_DIGEST, LOCAL_SHA_256_DIGEST)) {
-                            RESULT = new Result(1 + WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
+                            RESULT = new Result(1 + WORKING_POSITION, WORDS_TO_WORK.get(bipPosition), SEED);
                         }
                     }
                 } catch (Exception e) {
@@ -310,17 +333,30 @@ public class Worker {
             this.seed = seed;
         }
 
-        public Result(int position, String word) {
+        public Result(int position, String word, List<String> seed) {
             this.position = position;
             this.word = word;
+            this.seed = seed;
         }
 
         @Override
         public String toString() {
-            if (seed==null){
+            if (word!=null && !word.isEmpty()){
                 return "position=" + position + ", word='" + word + '\'';
             }else {
                 return Utils.SPACE_JOINER.join(seed);
+            }
+        }
+
+        public String toStringFile(){
+            if (seed==null){
+                return "position=" + position + ", word='" + word + '\'';
+            }else {
+                String out = Utils.SPACE_JOINER.join(seed);
+                if (word!=null && !word.isEmpty()){
+                    out = "position=" + position + ", word='" + word + '\'' + "\r\n" + out;
+                }
+                return out;
             }
         }
     }

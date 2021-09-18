@@ -72,7 +72,7 @@ public class WorkerKnownPosition extends Worker{
 
         for (int w0=configuration.getKnownStart(); RESULT==null && w0<DICTIONARY_SIZE; w0++){
             String processedWord = Configuration.MNEMONIC_CODE.getWordList().get(w0);
-            System.out.println("Processing word "+(w0+1)+"/"+DICTIONARY_SIZE+" on position "+(position+1)+"! '"+processedWord+"' "+SDF.format(new Date()));
+            System.out.println("Processing word "+(w0+1)+"/"+DICTIONARY_SIZE+" on position "+(position+1)+"! '"+processedWord+"' "+ SDTF.format(new Date()));
             mnemonic.set(position, processedWord);
             final CountDownLatch latch = new CountDownLatch(THREADS);
             final ExecutorService executorService = Executors.newFixedThreadPool(THREADS);
@@ -113,7 +113,7 @@ public class WorkerKnownPosition extends Worker{
                 return;
             }
             if (reporter && (System.currentTimeMillis()-start > STATUS_PERIOD)){
-                System.out.println(SDF.format(new Date())+ " Alive!");
+                System.out.println(SDTF.format(new Date())+ " Alive!");
                 start = System.currentTimeMillis();
             }
         }else{

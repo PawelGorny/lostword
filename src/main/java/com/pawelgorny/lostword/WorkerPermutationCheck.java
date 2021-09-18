@@ -63,7 +63,7 @@ public class WorkerPermutationCheck extends Worker{
             System.out.println(e.getLocalizedMessage());
         }
         if (System.currentTimeMillis()-start > STATUS_PERIOD){
-            System.out.println(SDF.format(new Date())+ " Alive!");
+            System.out.println(SDTF.format(new Date())+ " Alive!");
             start = System.currentTimeMillis();
         }
         return (RESULT!=null);

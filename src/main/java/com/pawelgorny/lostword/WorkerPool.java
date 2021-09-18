@@ -46,6 +46,9 @@ public class WorkerPool extends Worker {
     private void checkUnknown(int position) throws InterruptedException {
         List<String> mnemonic = new ArrayList<>(configuration.getWORDS());
         int nextPosition = getNextUnknown(1+position, configuration.getWORDS());
+        if (nextPosition == -1){
+            nextPosition = position;
+        }
         List<List<String>> DICTIONARY = split(configuration.getWORDS_POOL().get(nextPosition));
 
         final List<MessageDigest> SHA_256_DIGESTS= new ArrayList<>(THREADS);
@@ -60,7 +63,7 @@ public class WorkerPool extends Worker {
         int DIC_SIZE = configuration.getWORDS_POOL().get(position).size();
         for (int w0=0; RESULT==null && w0<DIC_SIZE; w0++){
             String processedWord = configuration.getWORDS_POOL().get(position).get(w0);
-            System.out.println("Processing word "+(w0+1)+"/"+DIC_SIZE+" on position "+(position+1)+"! '"+processedWord+"' "+SDF.format(new Date()));
+            System.out.println("Processing tree "+(w0+1)+"/"+DIC_SIZE+" from position "+(position+1)+"! '"+processedWord+"' "+ SDTF.format(new Date()));
             mnemonic.set(position, processedWord);
             final CountDownLatch latch = new CountDownLatch(THREADS);
             final ExecutorService executorService = Executors.newFixedThreadPool(THREADS);
@@ -101,7 +104,7 @@ public class WorkerPool extends Worker {
                 return;
             }
             if (reporter && (System.currentTimeMillis()-start > STATUS_PERIOD)){
-                System.out.println(SDF.format(new Date())+ " Alive!");
+                System.out.println(SDTF.format(new Date())+ " Alive!");
                 start = System.currentTimeMillis();
             }
         }else{

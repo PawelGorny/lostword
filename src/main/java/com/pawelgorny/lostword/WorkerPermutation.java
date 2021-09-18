@@ -24,7 +24,7 @@ public class WorkerPermutation extends Worker{
         }catch (Exception e){
             System.out.println(e.getLocalizedMessage());
         }
-        fileName = "PERMUTATATIONS_"+(System.currentTimeMillis())+".txt";
+        fileName = "PERMUTATIONS_"+(System.currentTimeMillis())+".txt";
         System.out.println("Saving to file: "+fileName);
     }
 

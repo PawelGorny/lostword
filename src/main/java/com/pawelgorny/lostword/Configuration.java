@@ -252,4 +252,8 @@ public final class Configuration {
     public String getEthereumAddress() {
         return ethereumAddress;
     }
+
+    public String getDerivationPathFull() {
+        return derivationPathFull;
+    }
 }

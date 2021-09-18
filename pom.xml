@@ -6,7 +6,7 @@
 
     <groupId>com.pawelgorny</groupId>
     <artifactId>lostword</artifactId>
-    <version>0.13.2</version>
+    <version>0.13.3</version>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>25.0-jre</version>
+            <version>30.0-jre</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
