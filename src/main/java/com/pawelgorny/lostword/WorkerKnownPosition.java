@@ -6,6 +6,7 @@ import org.bouncycastle.crypto.macs.HMac;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -78,7 +79,7 @@ public class WorkerKnownPosition extends Worker{
             final ExecutorService executorService = Executors.newFixedThreadPool(THREADS);
             for (int t = 0; t < THREADS; t++) {
                 final int WORKING_POSITION = nextPosition;
-                final List<String> SEED = new ArrayList<>(mnemonic);
+                final List<String> SEED = new LinkedList<>(mnemonic);
                 final List<String> WORDS_TO_WORK = DICTIONARY.get(t);
                 final boolean REPORTER = t==0;
                 final int T_NUMBER=t;
@@ -105,37 +106,45 @@ public class WorkerKnownPosition extends Worker{
         }
     }
 
-    private void processSeed(final List<String> seed, int depth, int positionStartSearch, boolean reporter, HMac SHA_512_DIGEST, MessageDigest SHA_256_DIGEST) throws MnemonicException {
+    private Boolean processSeed(final List<String> seed, int depth, int positionStartSearch, boolean reporter, HMac SHA_512_DIGEST, MessageDigest SHA_256_DIGEST) throws MnemonicException {
         if (NUMBER_UNKNOWN==depth){
-            if (check(seed, SHA_512_DIGEST, SHA_256_DIGEST)){
+            Boolean checkResult = check(seed, SHA_512_DIGEST, SHA_256_DIGEST);
+            if (checkResult!=null&&checkResult){
                 System.out.println(seed);
                 RESULT = new Result(new ArrayList<>(seed));
-                return;
+                return true;
             }
             if (reporter && (System.currentTimeMillis()-start > STATUS_PERIOD)){
                 System.out.println(SDTF.format(new Date())+ " Alive!");
                 start = System.currentTimeMillis();
             }
+            return configuration.isMissingChecksum()?(checkResult==null?false:null):checkResult;
         }else{
             int nextDepth = depth + 1;
             int position = getNextUnknown(positionStartSearch, seed);
             if(position == -1){
-                if (check(seed, SHA_512_DIGEST, SHA_256_DIGEST)){
+                Boolean checkResult = check(seed, SHA_512_DIGEST, SHA_256_DIGEST);
+                if (checkResult!=null&&checkResult){
                     System.out.println(seed);
                     RESULT = new Result(new ArrayList<>(seed));
                 }
-                return;
+                return false;
             }
             int positionStartNextSearch = 0;
             if (nextDepth <NUMBER_UNKNOWN ){
                 positionStartNextSearch = position+1;
             }
+            int checksumCheckLimit = configuration.getMissingChecksumLimit();
             for (int w = 0; RESULT==null && w<DICTIONARY_SIZE; w++){
                 seed.set(position, Configuration.MNEMONIC_CODE.getWordList().get(w));
-                processSeed(seed, nextDepth, positionStartNextSearch, reporter, SHA_512_DIGEST, SHA_256_DIGEST);
+                Boolean result = processSeed(seed, nextDepth, positionStartNextSearch, reporter, SHA_512_DIGEST, SHA_256_DIGEST);
+                if(result == null && --checksumCheckLimit==0){
+                    break;
+                }
             }
             seed.set(position, Configuration.UNKNOWN_CHAR);
         }
+        return false;
     }
 
     private void checkOne(int position) throws InterruptedException {

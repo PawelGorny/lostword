@@ -153,6 +153,15 @@ public class Main {
         if (WORK.POOL.equals(work)){
             configuration.setWORDS_POOL(wordsPool);
         }
+        if (WORK.KNOWN_POSITION.equals(work) && words.get(size-1).equalsIgnoreCase("?")){
+            for (int s=9, b=3; s<=24; s+=3, b++){
+                if (s==size){
+                    configuration.setMissingChecksum(true);
+                    configuration.setMissingChecksumLimit((int)Math.pow(2,(11-b)));
+                    break;
+                }
+            }
+        }
         return configuration;
     }
 }

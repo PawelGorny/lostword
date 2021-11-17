@@ -40,10 +40,16 @@ public class Worker {
     private final long CREATION_SECONDS = Utils.currentTimeSeconds();
 
     private final int CONCAT_LEN_BITS;
+    private final int CONCAT_LEN_BITS_DIV_33;
+    private final int CONCAT_LEN_BITS_MINUS_CONCAT_LEN_BITS_DIV_33;
+    private final int CONCAT_LEN_BITS_MINUS_CONCAT_LEN_BITS_DIV_33__DIV8;
 
     public Worker(Configuration configuration)  {
         this.configuration = configuration;
         this.CONCAT_LEN_BITS = 11 * configuration.getSIZE();
+        this.CONCAT_LEN_BITS_DIV_33 = CONCAT_LEN_BITS/33;
+        this.CONCAT_LEN_BITS_MINUS_CONCAT_LEN_BITS_DIV_33 =  CONCAT_LEN_BITS - CONCAT_LEN_BITS_DIV_33;
+        this.CONCAT_LEN_BITS_MINUS_CONCAT_LEN_BITS_DIV_33__DIV8 = CONCAT_LEN_BITS_MINUS_CONCAT_LEN_BITS_DIV_33/8;
         int procs = Runtime.getRuntime().availableProcessors();
         if (procs > 1) {
             if (procs % 2 == 1) {
@@ -117,9 +123,9 @@ public class Worker {
         return check(mnemonic, null, null);
     }
 
-    protected boolean check(final List<String> mnemonic, HMac SHA512DIGEST, MessageDigest sha256) throws MnemonicException {
+    protected Boolean check(final List<String> mnemonic, HMac SHA512DIGEST, MessageDigest sha256) throws MnemonicException {
         if (!checksumCheck(mnemonic, sha256)){
-            return false;
+            return configuration.isMissingChecksum()?null:false;
         }
 
         if (Configuration.ETHEREUM.equals(configuration.getCoin())){
@@ -202,9 +208,7 @@ public class Worker {
             }
         }
 
-        int var11 = CONCAT_LEN_BITS / 33;
-        int var12 = CONCAT_LEN_BITS - var11;
-        byte[] var13 = new byte[var12 / 8];
+        byte[] var13 = new byte[CONCAT_LEN_BITS_MINUS_CONCAT_LEN_BITS_DIV_33__DIV8];
 
         for(hash = 0; hash < var13.length; ++hash) {
             for(int hashBits = 0; hashBits < 8; ++hashBits) {
@@ -217,8 +221,8 @@ public class Worker {
         byte[] var14 = hash(var13, 0, var13.length, sha256);
         boolean[] var15 = bytesToBits(var14);
 
-        for(int i = 0; i < var11; ++i) {
-            if(concatBits[var12 + i] != var15[i]) {
+        for(int i = 0; i < CONCAT_LEN_BITS_DIV_33; ++i) {
+            if(concatBits[CONCAT_LEN_BITS_MINUS_CONCAT_LEN_BITS_DIV_33 + i] != var15[i]) {
                 return false;
             }
         }
@@ -309,7 +313,8 @@ public class Worker {
                     final HMac LOCAL_SHA_512_DIGEST = createHmacSha512Digest();
                     for (int bipPosition = 0; RESULT == null && bipPosition < WORDS_TO_WORK.size(); bipPosition++) {
                         SEED.set(WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
-                        if (check(SEED, LOCAL_SHA_512_DIGEST, LOCAL_SHA_256_DIGEST)) {
+                        Boolean checkResult = check(SEED, LOCAL_SHA_512_DIGEST, LOCAL_SHA_256_DIGEST);
+                        if (checkResult!=null && checkResult) {
                             RESULT = new Result(1 + WORKING_POSITION, WORDS_TO_WORK.get(bipPosition), SEED);
                         }
                     }

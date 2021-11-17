@@ -124,7 +124,7 @@ public class Test {
         }
 
         @Override
-        protected boolean check(List<String> mnemonic, HMac SHA512DIGEST, MessageDigest sha256) throws MnemonicException {
+        protected Boolean check(List<String> mnemonic, HMac SHA512DIGEST, MessageDigest sha256) throws MnemonicException {
             return super.check(mnemonic, SHA512DIGEST, sha256);
         }
 

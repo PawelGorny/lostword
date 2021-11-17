@@ -44,6 +44,9 @@ public final class Configuration {
 
     private final WORK work;
 
+    private boolean missingChecksum = false;
+    private int missingChecksumLimit = -1;
+
     public Configuration(WORK work, String targetAddress, String path, List<String> words, int knownStarter) {
         this.work = work;
         this.WORDS = words;
@@ -255,5 +258,21 @@ public final class Configuration {
 
     public String getDerivationPathFull() {
         return derivationPathFull;
+    }
+
+    public boolean isMissingChecksum() {
+        return missingChecksum;
+    }
+
+    public void setMissingChecksum(boolean missingChecksum) {
+        this.missingChecksum = missingChecksum;
+    }
+
+    public int getMissingChecksumLimit() {
+        return missingChecksumLimit;
+    }
+
+    public void setMissingChecksumLimit(int missingChecksumLimit) {
+        this.missingChecksumLimit = missingChecksumLimit;
     }
 }
