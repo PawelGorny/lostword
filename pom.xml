@@ -6,14 +6,14 @@
 
     <groupId>com.pawelgorny</groupId>
     <artifactId>lostword</artifactId>
-    <version>0.14.1</version>
+    <version>0.14.2</version>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.bitcoinj</groupId>
             <artifactId>bitcoinj-core</artifactId>
-            <version>0.15.10</version>
+            <version>0.16.1</version>
         </dependency>
         <dependency>
             <groupId>org.web3j</groupId>

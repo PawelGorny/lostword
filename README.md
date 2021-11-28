@@ -143,7 +143,7 @@ Example of search with a range:
 
 Contact
 -------
-Contact email: crypto@pawelgorny.com
+Contact email: pawgo@protonmail.com
 If you found this program useful, consider making a donation, I will appreciate it! 
 **BTC**: `34dEiyShGJcnGAg2jWhcoDDRxpennSZxg8`
 
