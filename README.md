@@ -20,7 +20,7 @@ If derivation path is not specified, by default program is using "m/0/0" (BIP32 
 
 Program supports also Ethereum (path m/44'/60'/0'/0/0)
 
-Program could be launched in 2 modes:
+Program could be launched in several modes:
 <ol>
 <li>ONE_UNKNOWN</li>
 Suitable for seeds where we know the number of words, we know order of words, but we do not know one word.
