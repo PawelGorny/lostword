@@ -147,9 +147,4 @@ Contact email: pawgo@protonmail.com
 If you found this program useful, consider making a donation, I will appreciate it! 
 **BTC**: `34dEiyShGJcnGAg2jWhcoDDRxpennSZxg8`
 
-TODO
-----
-<ol>
-<li>checking several addresses for the path (up to address number X)</li>
-<li>add support for other derivation paths</li>
-</ol>
+
