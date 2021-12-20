@@ -1,5 +1,5 @@
 # LostWord
-Tool for finding missing word for BIP39 seed, having (n-1) known ordered words.
+Tool for finding partially lost BIP39 seed.
 Program works with P2WPKH: BIP84, BIP141 or P2PKH: BIP32, BIP44 Derivation Path.
 
 Usage:
