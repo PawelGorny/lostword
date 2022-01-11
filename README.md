@@ -1,6 +1,6 @@
 # LostWord
 Tool for finding partially lost BIP39 seed.
-Program works with P2WPKH: BIP84, BIP141 or P2PKH: BIP32, BIP44 Derivation Path.
+Program works with P2WPKH: BIP84, BIP141; P2PKH: BIP32, BIP44; P2WPKH nested in P2SH: BIP141.
 
 Usage:
 `java -jar lostWord.jar configurationFile`
