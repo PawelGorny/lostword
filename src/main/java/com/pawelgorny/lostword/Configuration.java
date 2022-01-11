@@ -76,6 +76,8 @@ public final class Configuration {
                     DBscriptType = Script.ScriptType.P2PKH;
                 } else if (Script.ScriptType.P2WPKH.name().equalsIgnoreCase(t[1])) {
                     DBscriptType = Script.ScriptType.P2WPKH;
+                }  else if (Script.ScriptType.P2SH.name().equalsIgnoreCase(t[1])) {
+                    DBscriptType = Script.ScriptType.P2SH;
                 }
             }
             this.targetAddress = t[0].trim();
@@ -84,6 +86,9 @@ public final class Configuration {
             DBscriptType = Script.ScriptType.P2PKH;
             if (this.targetAddress.startsWith("bc1")) {
                 DBscriptType = Script.ScriptType.P2WPKH;
+            }
+            if (this.targetAddress.startsWith("3")) {
+                DBscriptType = Script.ScriptType.P2SH;
             }
             if (this.targetAddress.startsWith("0x")){
                 this.targetAddress = this.targetAddress.substring(2);
@@ -101,6 +106,10 @@ public final class Configuration {
                     case P2WPKH:
                         segwitAddress = SegwitAddress.fromBech32(getNETWORK_PARAMETERS(), getTargetAddress());
                         segwitAddressHash = segwitAddress.getHash();
+                        break;
+                    default:
+                        legacyAddress = LegacyAddress.fromBase58(getNETWORK_PARAMETERS(), getTargetAddress());
+                        legacyAddressHash = legacyAddress.getHash();
                         break;
                 }
             }

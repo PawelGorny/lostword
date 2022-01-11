@@ -2,9 +2,12 @@ package com.pawelgorny.lostword;
 
 import com.pawelgorny.lostword.util.PBKDF2SHA512;
 import org.bitcoinj.core.Address;
+import org.bitcoinj.core.LegacyAddress;
 import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.*;
 import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
+import org.bitcoinj.script.ScriptPattern;
 import org.bitcoinj.wallet.DeterministicKeyChain;
 import org.bitcoinj.wallet.DeterministicSeed;
 import org.bouncycastle.crypto.digests.SHA512Digest;
@@ -152,7 +155,13 @@ public class Worker {
             if (configuration.getDBscriptType().equals(Script.ScriptType.P2WPKH)){
 //                result = Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, Script.ScriptType.P2WPKH).equals(configuration.getSegwitAddress());
                 result = Arrays.equals(configuration.getSegwitAddressHash(), deterministicKey.getPubKeyHash());
-            }else {
+            } else if (configuration.getDBscriptType().equals(Script.ScriptType.P2SH)){
+                Script redeemScript = ScriptBuilder.createP2WPKHOutputScript(deterministicKey);
+                Script script = ScriptBuilder.createP2SHOutputScript(redeemScript);
+                byte[] scriptHash = ScriptPattern.extractHashFromP2SH(script);
+                LegacyAddress legacyAddress = LegacyAddress.fromScriptHash(configuration.getNETWORK_PARAMETERS(), scriptHash);
+                result = legacyAddress.equals(configuration.getLegacyAddress());
+            } else {
                 result = Address.fromKey(configuration.getNETWORK_PARAMETERS(), deterministicKey, configuration.getDBscriptType()).equals(configuration.getLegacyAddress());
             }
             if (result){

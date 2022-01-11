@@ -14,9 +14,9 @@ Configuration file expects: address, number of words, known words and additional
 This version checks only one address - for the given path. In the future (or if requested) I will add possibility to verify all the addresses up to address number x. If you know the address but you do not know if it was first or second from the derivation path, you must launch program twice, using two different paths (for example m/0/0 and m/0/1).
 It is possible to launch tests against 'hardened' addresses, using ' (apostrophe) as the last character of path.
 Using page https://iancoleman.io/bip39/ you may easily check what to expect for the given seed.
-By default program uses P2PKH script semantics for addresses like "1..." and P2WPKH for addresses like "bc1...".
+By default program uses P2PKH script semantics for addresses like "1...", P2WPKH for addresses like "bc1..." and P2WPKH nested in P2SH for addresses like "3..." (BIP141).
 
-If derivation path is not specified, by default program is using "m/0/0" (BIP32 for P2PKH and BIP141 for P2WPKH). If you want to do calculations for BIP44 or BIP84, please use the proper derivation path, for example "m/44'/0'/0'/0/0" or "m/84'/0'/0'/0/0", where the last two digits are the most important (account & number of address).
+If derivation path is not specified, by default program is using "m/0/0" (BIP32 for P2PKH and BIP141 for P2WPKH). For example: if you want to do calculations for BIP44 or BIP84, please use the proper derivation path, for example "m/44'/0'/0'/0/0" or "m/84'/0'/0'/0/0", where the last two digits are the most important (account & number of address).
 
 Program supports also Ethereum (path m/44'/60'/0'/0/0)
 
