@@ -1,5 +1,5 @@
 # LostWord
-Tool for finding missing word for BIP39 seed, having (n-1) known ordered words.
+Tool for finding partially lost BIP39 seed.
 Program works with P2WPKH: BIP84, BIP141 or P2PKH: BIP32, BIP44 Derivation Path.
 
 Usage:
@@ -20,7 +20,7 @@ If derivation path is not specified, by default program is using "m/0/0" (BIP32 
 
 Program supports also Ethereum (path m/44'/60'/0'/0/0)
 
-Program could be launched in 2 modes:
+Program could be launched in several modes:
 <ol>
 <li>ONE_UNKNOWN</li>
 Suitable for seeds where we know the number of words, we know order of words, but we do not know one word.
@@ -147,9 +147,4 @@ Contact email: pawgo@protonmail.com
 If you found this program useful, consider making a donation, I will appreciate it! 
 **BTC**: `34dEiyShGJcnGAg2jWhcoDDRxpennSZxg8`
 
-TODO
-----
-<ol>
-<li>checking several addresses for the path (up to address number X)</li>
-<li>add support for other derivation paths</li>
-</ol>
+
