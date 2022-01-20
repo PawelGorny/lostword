@@ -124,6 +124,22 @@ Configuration file example (seed with 6 words, one word unknown, known possible 
     pitch
     hill
 
+<li>PRINT_SEEDS</li>
+Prints on screen and saves to file all the possible seeds generated from the given list of works (with 1 or more words missing).
+Configuration file example (seed with 6 words):
+
+    PRINT_SEEDS
+    anyText
+    6
+    brother
+    canal
+    ?
+    remove
+    pitch
+    hill
+    
+
+    
 </ol>
 
 For BTC only (not ETH): 
