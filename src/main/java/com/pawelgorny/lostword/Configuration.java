@@ -96,7 +96,7 @@ public final class Configuration {
                 this.coin = Configuration.ETHEREUM;
             }
         }
-        if (!WORK.ONE_UNKNOWN_CHECK_ALL.equals(work) && !WORK.PERMUTATION.equals(work)){
+        if (!WORK.ONE_UNKNOWN_CHECK_ALL.equals(work) && !WORK.PERMUTATION.equals(work) && !WORK.PRINT_SEEDS.equals(work)){
             if (this.ethereumAddress==null){
                 switch (getDBscriptType()){
                     case P2PKH:

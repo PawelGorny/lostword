@@ -17,6 +17,7 @@ public class WorkerPermutationCheck extends Worker{
 
     private MessageDigest SHA_256_DIGEST;
     private long start = 0;
+    long counter = 0L;
 
     public WorkerPermutationCheck(Configuration configuration) {
         super(configuration);
@@ -114,6 +115,9 @@ public class WorkerPermutationCheck extends Worker{
         List<String> mnemonic = Arrays.asList(target);
         try {
             boolean result = check(mnemonic, LOCAL_SHA_512_DIGEST, LOCAL_SHA_256_DIGEST);
+            if (REPORTER) {
+                counter++;
+            }
             if (result){
                 RESULT = new Result(mnemonic);
             }
@@ -121,7 +125,8 @@ public class WorkerPermutationCheck extends Worker{
             System.out.println(e.getLocalizedMessage());
         }
         if (REPORTER && (System.currentTimeMillis()-start > STATUS_PERIOD)){
-            System.out.println(SDTF.format(new Date())+ " Alive!");
+            System.out.println(SDTF.format(new Date())+ " Alive! "+counter);
+            counter = 0;
             start = System.currentTimeMillis();
         }
         return (RESULT!=null);

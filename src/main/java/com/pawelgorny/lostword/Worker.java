@@ -47,6 +47,8 @@ public class Worker {
     private final int CONCAT_LEN_BITS_MINUS_CONCAT_LEN_BITS_DIV_33;
     private final int CONCAT_LEN_BITS_MINUS_CONCAT_LEN_BITS_DIV_33__DIV8;
 
+    protected final List<String> PRINT_SEEDS=new ArrayList<>(0);
+
     public Worker(Configuration configuration)  {
         this.configuration = configuration;
         this.CONCAT_LEN_BITS = 11 * configuration.getSIZE();
@@ -84,9 +86,12 @@ public class Worker {
             case PERMUTATION:
                 worker = new WorkerPermutation(configuration);
                 break;
+            case PRINT_SEEDS:
+                worker = new WorkerPrintSeeds(configuration);
+                break;
         }
         System.out.println("--- Starting worker --- "+ SDTF.format(new Date())+" ---");
-        if (WORK.PERMUTATION.equals(configuration.getWork())){
+        if (WORK.PERMUTATION.equals(configuration.getWork()) || WORK.PRINT_SEEDS.equals(configuration.getWork())){
             worker.run();
             System.out.println();
             return;
@@ -171,6 +176,21 @@ public class Worker {
             addressToWork++;
         }
         return false;
+    }
+
+    protected Boolean checkPrint(final List<String> mnemonic, HMac SHA512DIGEST, MessageDigest sha256) throws MnemonicException {
+        if (!checksumCheck(mnemonic, sha256)){
+            return configuration.isMissingChecksum()?null:false;
+        }
+
+        if (Configuration.ETHEREUM.equals(configuration.getCoin())){
+            return checkEthereum(mnemonic);
+        }
+
+        String seed = Utils.SPACE_JOINER.join(mnemonic);
+        System.out.println(seed);
+        PRINT_SEEDS.add(seed);
+        return true;
     }
 
     protected boolean checkEthereum(final List<String> mnemonic) throws MnemonicException {

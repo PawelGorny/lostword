@@ -3,27 +3,36 @@ package com.pawelgorny.lostword;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bouncycastle.crypto.macs.HMac;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class WorkerKnownPosition extends Worker{
+public class WorkerPrintSeeds extends Worker{
 
     private static int NUMBER_UNKNOWN;
     private long start = 0;
     private long COUNTER = 0L;
 
-    public WorkerKnownPosition(Configuration configuration) {
+    public WorkerPrintSeeds(Configuration configuration) {
         super(configuration);
+        THREADS = 1;
     }
 
     public void run() throws InterruptedException, MnemonicException {
         check();
+        try {
+            FileWriter fileWriter = new FileWriter(this.configuration.getWork().name() + "_result_" + SDTCF.format(new Date()) + ".txt", false);
+            for (String seed:PRINT_SEEDS) {
+                fileWriter.write(seed+"\r\n");
+            }
+            fileWriter.close();
+        } catch (IOException e) {
+            System.out.println("Cannot write to file: " + e.getLocalizedMessage());
+        }
     }
 
     private void check() throws MnemonicException, InterruptedException {
@@ -109,7 +118,7 @@ public class WorkerKnownPosition extends Worker{
 
     private Boolean processSeed(final List<String> seed, int depth, int positionStartSearch, boolean reporter, HMac SHA_512_DIGEST, MessageDigest SHA_256_DIGEST) throws MnemonicException {
         if (NUMBER_UNKNOWN==depth){
-            Boolean checkResult = check(seed, SHA_512_DIGEST, SHA_256_DIGEST);
+            Boolean checkResult = checkPrint(seed, SHA_512_DIGEST, SHA_256_DIGEST);
             COUNTER++;
             if (checkResult!=null&&checkResult){
                 System.out.println(seed);
@@ -151,6 +160,46 @@ public class WorkerKnownPosition extends Worker{
     }
 
     private void checkOne(int position) throws InterruptedException {
-        processPosition(position);
+        List<List<String>> DICTIONARY = split();
+        System.out.println("Checking missing word at position " + (position + 1));
+        Iterator<String> iterator = configuration.getWORDS().iterator();
+        int p = 0;
+        List<String> mnemonic = new ArrayList<>(configuration.getSIZE());
+        for (int i = 0; i < configuration.getSIZE(); i++) {
+            mnemonic.add("");
+        }
+        while (iterator.hasNext()) {
+            String word = iterator.next();
+            if (Configuration.UNKNOWN_CHAR.equalsIgnoreCase(word)){
+                continue;
+            }
+            if (p == position) {
+                p++;
+            }
+            mnemonic.set(p++, word);
+        }
+        final CountDownLatch latch = new CountDownLatch(THREADS);
+        final ExecutorService executorService = Executors.newFixedThreadPool(THREADS);
+        for (int t = 0; t < THREADS; t++) {
+            final int WORKING_POSITION = position;
+            final List<String> WORDS_TO_WORK = DICTIONARY.get(t);
+            final List<String> SEED = new ArrayList<>(mnemonic);
+            executorService.submit(() -> {
+                try {
+                    final MessageDigest LOCAL_SHA_256_DIGEST = MessageDigest.getInstance("SHA-256");
+                    final HMac LOCAL_SHA_512_DIGEST = createHmacSha512Digest();
+                    for (int bipPosition = 0; RESULT == null && bipPosition < WORDS_TO_WORK.size(); bipPosition++) {
+                        SEED.set(WORKING_POSITION, WORDS_TO_WORK.get(bipPosition));
+                        checkPrint(SEED, LOCAL_SHA_512_DIGEST, LOCAL_SHA_256_DIGEST);
+                    }
+                } catch (Exception e) {
+                    Thread.currentThread().interrupt();
+                }
+                latch.countDown();
+            });
+        }
+        latch.await();
+        executorService.shutdown();
     }
+
 }

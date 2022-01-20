@@ -88,7 +88,7 @@ public class Main {
                                 }
                                 words.add(line);
                             }
-                        }else if (WORK.KNOWN_POSITION.equals(work) || WORK.PERMUTATION.equals(work) || WORK.PERMUTATION_CHECK.equals(work)){
+                        }else if (WORK.KNOWN_POSITION.equals(work) || WORK.PERMUTATION.equals(work) || WORK.PERMUTATION_CHECK.equals(work)|| WORK.PRINT_SEEDS.equals(work)){
                             if (words.size() == size) {
                                 path = line;
                             }else if (words.size() < size) {
@@ -153,7 +153,7 @@ public class Main {
         if (WORK.POOL.equals(work)){
             configuration.setWORDS_POOL(wordsPool);
         }
-        if (WORK.KNOWN_POSITION.equals(work) && words.get(size-1).equalsIgnoreCase("?")){
+        if ((WORK.KNOWN_POSITION.equals(work)||WORK.PRINT_SEEDS.equals(work)) && words.get(size-1).equalsIgnoreCase("?")){
             for (int s=9, b=3; s<=24; s+=3, b++){
                 if (s==size){
                     configuration.setMissingChecksum(true);
