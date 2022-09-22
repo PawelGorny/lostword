@@ -6,7 +6,7 @@
 
     <groupId>com.pawelgorny</groupId>
     <artifactId>lostword</artifactId>
-    <version>0.16.0</version>
+    <version>0.17.0</version>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -40,7 +40,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
-            <scope>test</scope>
+
         </dependency>
     </dependencies>
 

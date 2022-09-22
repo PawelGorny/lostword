@@ -89,9 +89,12 @@ public class Worker {
             case PRINT_SEEDS:
                 worker = new WorkerPrintSeeds(configuration);
                 break;
+            case SWAP:
+                worker = new WorkerSwap(configuration);
+                break;
         }
         System.out.println("--- Starting worker --- "+ SDTF.format(new Date())+" ---");
-        if (WORK.PERMUTATION.equals(configuration.getWork()) || WORK.PRINT_SEEDS.equals(configuration.getWork())){
+        if (WORK.PERMUTATION.equals(configuration.getWork()) || WORK.PRINT_SEEDS.equals(configuration.getWork())|| WORK.SWAP.equals(configuration.getWork())){
             worker.run();
             System.out.println();
             return;
